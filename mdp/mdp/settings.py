@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +26,7 @@ SECRET_KEY = '2ff)0^sr+g_0es-$)(sj^1hsfl(%(!+el(eczo00^+f%m^#-)&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.3.101.90','mp.erldc.net', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -81,7 +82,7 @@ WSGI_APPLICATION = 'mdp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -122,5 +123,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
 CORS_ALLOW_ALL_ORIGINS = True
+
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS=[os.path.join(BASE_DIR,"static")]
+MEDIA_URL="media/"
+MEDIA_ROOT=os.path.join(BASE_DIR,'fifteenmmdp/media/')
+# LOGIN_URL = '/login'

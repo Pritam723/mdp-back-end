@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import json
 
 # Create your views here.
 
@@ -36,7 +37,6 @@ def test(request):
     return HttpResponse("I am test")
 
 def addMasterData(request):
-    import json
     import os
     print(os.getcwdb())
     def path_to_dict(path):
@@ -62,6 +62,14 @@ def fetchMD(request):
     ml = jsonDec.decode(AllMeterFiles.objects.all())
     return(JsonResponse(ml))
 
+@csrf_exempt
+def getAllMeterData(request):
+    from django.core import serializers
+    AllMeterFiles_json = AllMeterFiles.objects.all()
+    AllMeterFiles_json = serializers.serialize("json", AllMeterFiles.objects.all() , fields=('id','year' , 'month','zippedMeterFile'))
+    # data = {"data": AllMeterFiles_json}
+    # return JsonResponse(data)
+    return HttpResponse(AllMeterFiles_json, content_type="text/json-comment-filtered")
 
 @csrf_exempt
 def addNewMeterFile(request):
@@ -74,14 +82,49 @@ def addNewMeterFile(request):
     month = request.POST['month']
     meterZippedFile = request.FILES['meterZippedFile']
 
-    AllMeterFiles.objects.create(year=year, month=month, zippedMeterFile = meterZippedFile )
-    return HttpResponse({'message': 'AllMeterFiles created'}, status=200)
+    meterData = AllMeterFiles.objects.create(year=year, month=month, zippedMeterFile = meterZippedFile )
+    meterData.save()
+    return HttpResponse(json.dumps({'id' : meterData.id, 'message': 'MeterFile added'}), content_type='application/json')
+
+
 
 @csrf_exempt
-def getAllMeterData(request):
-    from django.core import serializers
-    AllMeterFiles_json = AllMeterFiles.objects.all()
-    AllMeterFiles_json = serializers.serialize("json", AllMeterFiles.objects.all() , fields=('id','year' , 'month','zippedMeterFile'))
-    # data = {"data": AllMeterFiles_json}
-    # return JsonResponse(data)
-    return HttpResponse(AllMeterFiles_json, content_type="text/json-comment-filtered")
+def editNewMeterFile(request,meter_id):
+    print("Edit : I have request object id :" + meter_id)
+
+    print(request.POST['year'])
+    print(request.POST['month'])
+
+    # # print(request.POST['meterZippedFile'].name)
+
+    # year = request.POST['year']
+    # month = request.POST['month']
+    # meterZippedFile = request.FILES['meterZippedFile']
+
+    # meterData = AllMeterFiles.objects.create(year=year, month=month, zippedMeterFile = meterZippedFile )
+    # meterData.save()
+    # return HttpResponse(json.dumps({'id' : meterData.id, 'message': 'MeterFile added'}), content_type='application/json')
+
+
+
+@csrf_exempt
+def deleteNewMeterFile(request,meter_id):
+    print(meter_id)
+    AllMeterFiles.objects.get(id=int(meter_id)).delete()
+    return HttpResponse({'message': 'Meter deleted'}, status=200)
+
+@csrf_exempt
+def unzipMeterData(request,meter_id):
+    import zipfile
+    print("meter_id")
+    print(meter_id)
+    meterData = AllMeterFiles.objects.get(id=meter_id)
+    print(meterData.zippedMeterFile)
+    with zipfile.ZipFile('fifteenmmdp/media/'+ str(meterData.zippedMeterFile), 'r') as zip_ref:
+        zip_ref.extractall("fifteenmmdp/media/"+ "/".join(str(meterData.zippedMeterFile).split('/')[:-1]))
+
+
+
+# def home(request):
+# 	context={'file':filtered_Meter(request.user)}
+# 	return render(request,'fiveminutemeter/home.html',context)
