@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata' 
 
 USE_I18N = True
 
@@ -130,6 +130,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS=[os.path.join(BASE_DIR,"static")]
-MEDIA_URL="media/"
+MEDIA_URL="media/"  # So in our app case fifteenmmdp/media will land to Media Root
 MEDIA_ROOT=os.path.join(BASE_DIR,'fifteenmmdp/media/')
 # LOGIN_URL = '/login'
