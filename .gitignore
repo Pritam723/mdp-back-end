@@ -1,4 +1,5 @@
 \mdpVenv
+\mdp\fifteenmmdp\media\meterFile
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
