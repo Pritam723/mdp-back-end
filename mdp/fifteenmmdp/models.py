@@ -7,10 +7,14 @@ import os
 
 class OverwriteStorage(FileSystemStorage):
     def get_valid_name(self, name):
-            # return get_valid_filename(name)
-            return name
+        print("inside Overwss")
+        print(name)
+        # return get_valid_filename(name)
+        return name
     def get_available_name(self, name,max_length=None):
         if self.exists(name):
+            print("inside Overwss")
+            print(name)
             os.remove(os.path.join(settings.MEDIA_ROOT, name))
         return name
 
@@ -27,36 +31,16 @@ class AllMeterFiles(models.Model):
 
     zippedMeterFile = models.FileField(upload_to = upload_path,validators=[validate_file_extension],max_length=1023)
     
-    dirStructure = models.TextField(null=True) # JSON-serialized (text) version of your "NPC Files" Folder Structure.
-    dirStructureRealMWH = models.TextField(null=True) # JSON-serialized (text) version of your "Real Meter MWH Files" Folder Structure.
-    dirStructureFictMWH = models.TextField(null=True) # JSON-serialized (text) version of your "Fict Meter MWH Files" Folder Structure.
-    dirStructureFinalOutput = models.TextField(null=True) # JSON-serialized (text) version of your "Final Output Files" Folder Structure.
-
     added_by = models.ForeignKey(settings.AUTH_USER_MODEL,null=True, blank=True, on_delete=models.SET_NULL)
-    status = models.CharField(null=True,max_length=255)     
+    status = models.CharField(null=True,max_length=255)  
+
     # {'Uploaded' , 'Extracted' , 'Merged' ,'Verified', 'DateFiltered', 'MWHCreated', 'FictCreated' , 'FinalOutputCreated' }
-    
-    # def save(self,*args, **kwargs):
-    #     self.added_by = request.user
-    #     super().save(request,*args, **kwargs)
 
     def __str__(self):
         return("Meter ID : "+ str(self.id) +". Data for " + self.month + "," + self.year)
     
     def myId(self):
         return self.id
-
-
-
-def upload_path_realMeterMWH(instance, filename):
-    # return '/'.join(['meterFile', filename])
-    return instance.filePath
-    # return '/'.join(['meterFile', filename])
-        
-def upload_path_npc(instance, filename):
-    # return '/'.join(['meterFile', filename])
-    return instance.filePath
-    # return '/'.join(['meterFile', filename])
 
 def upload_path_mergedFile(instance, filename):
     # return '/'.join(['meterFile', 'meterFile' + str(instance.id),'Merged File', filename])
@@ -71,21 +55,24 @@ def upload_path_validatedFile(instance, filename):
     # return '/'.join(['meterFile', 'meterFile' + str(instance.id),'Merged File', filename])
     return instance.filePath
 
-
 def upload_path_realMeterMWH(instance, filename):
-    # return '/'.join(['meterFile', filename])
+    # return '/'.join(['meterFile', 'meterFile' + str(instance.id),'Merged File', filename])
     return instance.filePath
-    # return '/'.join(['meterFile', filename])
+def upload_path_npc(instance, filename):
+    # return '/'.join(['meterFile', 'meterFile' + str(instance.id),'Merged File', filename])
+    return instance.filePath
 
 class NpcFile(models.Model):
     id = models.AutoField(primary_key=True)
-    fileName = models.CharField(max_length=255)
-    filePath = models.CharField(max_length=1023)
-    meterFile = models.ForeignKey(AllMeterFiles, on_delete=models.CASCADE)
-    npcFile = models.FileField(upload_to = upload_path_npc,validators=[validate_file_extension_npc],max_length=1023,storage=OverwriteStorage())
+    
+    dirStructureNPC = models.TextField(null=True) # JSON-serialized (text) version of your "NPC Files" Folder Structure.
+    npcDictionary = models.TextField(null=True)
+    meterFile = models.OneToOneField(AllMeterFiles, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.fileName
+        return("NPC Data for Meter ID : "+ str(self.meterFile.id))
+    def npcFileMeterId(self):
+        return(str(self.meterFile.id))
 
 
 class MergedFile(models.Model):
@@ -128,10 +115,13 @@ class ValidatedFile(models.Model):
 
 class RealMeterMWHFile(models.Model):
     id = models.AutoField(primary_key=True)
-    fileName = models.CharField(max_length=255)
-    filePath = models.CharField(max_length=1023)
+    
+    dirStructureRealMWH = models.TextField(null=True) # JSON-serialized (text) version of your "Real Meter MWH Files" Folder Structure.
+    mwhDictionary = models.TextField(null=True)
     meterFile = models.OneToOneField(AllMeterFiles, on_delete=models.CASCADE)
-    realMeterMWHFile = models.FileField(upload_to = upload_path_realMeterMWH,validators=[validate_file_extension],max_length=1023,storage=OverwriteStorage())
 
     def __str__(self):
-        return self.fileName
+        return("MWH File for Meter ID : "+ str(self.meterFile.id))
+    def realMeterMWHFileMeterId(self):
+        return(str(self.meterFile.id))
+

@@ -3,24 +3,25 @@ from .models import NpcFile
 from django.core.files import File
 
 
-def dirJsonNPC(path0,nPath,_meterData):
+def dirJsonNPC(nPath,_meterData,npcDict):
     d = {'name': os.path.basename(nPath)}
-    # d['size'] = str("{0:.2f}".format((os.stat(path0).st_size / 1024)) + "KB")
-    if os.path.isdir(path0):
+    # d['size'] = str("{0:.2f}".format((os.stat(nPath).st_size / 1024)) + "KB")
+    if os.path.isdir(nPath):
         d['type'] = "folder"
-        # d['path'] = nPath
-        d['files'] = [dirJsonNPC(os.path.join(path0, x),os.path.join(nPath, x),_meterData) for x in os.listdir(path0)]
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+        d['files'] = [dirJsonNPC(os.path.join(nPath, x),_meterData,npcDict) for x in os.listdir(nPath)]
     else:
-        if(os.path.splitext(path0)[1].lower() == '.npc') :
+        if(os.path.splitext(nPath)[1].lower() == '.npc') :
             print(os.path.basename(nPath))
-            local_file = open(path0,"rb")  #Open file from path0 i.e. extracted first path.
-            npcFileObject = NpcFile.objects.create(fileName = os.path.basename(nPath), filePath = nPath, meterFile = _meterData)
-            npcFileObject.npcFile.save(os.path.basename(nPath),  File(local_file))
-            npcFileObject.save()
-            local_file.close()
-            d['id'] = npcFileObject.id
+
+            d['id'] = npcDict['lastIndex']
+            npcDict[npcDict['lastIndex']] = os.path.relpath(nPath, 'fifteenmmdp/media')
+            npcDict['lastIndex'] = npcDict['lastIndex'] + 1
+
             d['type'] = "file"
-            # d['path'] = nPath
+            d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+
         else : 
             pass
     return d
+
