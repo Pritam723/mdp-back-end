@@ -26,10 +26,12 @@ urlpatterns = [
 	path('getMeterData/<str:meter_id>', views.getMeterData, name = "getMeterData"),
 	path('deleteNewMeterFile/<str:meter_id>', views.deleteNewMeterFile, name = "deleteNewMeterFile"),
 	# path('editNewMeterFile/<str:meter_id>', views.editNewMeterFile, name = "editNewMeterFile"),
-
+    
+	path('getNPCData/<str:meter_id>', views.getNPCData, name ="getNPCData"),
 	path('extract/<str:meter_id>', views.extract, name = "extract"),
-	path('changeNPC/<str:npc_id>', views.changeNPC, name = "changeNPC"),
-    path('downloadNPC/<str:npc_id>', views.downloadNPC, name ="downloadNPC"),
+	path('changeNPCFile/<str:meter_id>/<str:npc_id>', views.changeNPCFile, name ="changeNPCFile"),
+	path('downloadNPCFile/<str:meter_id>/<str:npc_id>', views.downloadNPCFile, name ="downloadNPCFile"),
+
 	
 	path('merge/<str:meter_id>', views.merge, name = "merge"),
 	path('getMergedFile/<str:meter_id>', views.getMergedFile, name ="getMergedFile"),
@@ -47,21 +49,15 @@ urlpatterns = [
 	path('downloadValidatedFile/<str:validatedFile_id>', views.downloadValidatedFile, name ="downloadValidatedFile"),
 	path('changeValidatedFile/<str:validatedFile_id>', views.changeValidatedFile, name ="changeValidatedFile"),
 
-
+    path('getRealMeterMWHData/<str:meter_id>', views.getRealMeterMWHData, name ="getRealMeterMWHData"),
 	path('realMeterMWH/<str:meter_id>', views.realMeterMWH, name = "realMeterMWH"),
-	path('changeRealMeterMWH/<str:realMeterMWH_id>', views.changeRealMeterMWH, name = "changeRealMeterMWH"),
-    path('downloadRealMeterMWH/<str:realMeterMWH_id>', views.downloadRealMeterMWH, name ="downloadRealMeterMWH"),
+	path('changeRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.changeRealMeterMWHFile, name ="changeRealMeterMWHFile"),
+	path('downloadRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.downloadRealMeterMWHFile, name ="downloadRealMeterMWHFile"),
+    
+
 
     url(r'^download/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
 
-
-
-	# path('task-list/', views.taskList, name="task-list"),
-	# path('task-detail/<str:pk>/', views.taskDetail, name="task-detail"),
-	# path('task-create/', views.taskCreate, name="task-create"),
-
-	# path('task-update/<str:pk>/', views.taskUpdate, name="task-update"),
-	# path('task-delete/<str:pk>/', views.taskDelete, name="task-delete"),
 ]
 if settings.DEBUG:
 	urlpatterns+=static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
