@@ -121,7 +121,30 @@ class RealMeterMWHFile(models.Model):
     meterFile = models.OneToOneField(AllMeterFiles, on_delete=models.CASCADE)
 
     def __str__(self):
-        return("MWH File for Meter ID : "+ str(self.meterFile.id))
+        return("Real MWH File for Meter ID : "+ str(self.meterFile.id))
     def realMeterMWHFileMeterId(self):
         return(str(self.meterFile.id))
 
+class FictMeterMWHFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    
+    dirStructureFictMWH = models.TextField(null=True) # JSON-serialized (text) version of your "Fict Meter MWH Files" Folder Structure.
+    fictMwhDictionary = models.TextField(null=True)
+    meterFile = models.OneToOneField(AllMeterFiles, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return("Fict MWH File for Meter ID : "+ str(self.meterFile.id))
+    def fictMeterMWHFileMeterId(self):
+        return(str(self.meterFile.id))
+
+class FinalOutputFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    
+    dirStructureFinalOutput = models.TextField(null=True) # JSON-serialized (text) version of your "Final Output Files" Folder Structure.
+    finalOutputDictionary = models.TextField(null=True)
+    meterFile = models.OneToOneField(AllMeterFiles, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return("Final Output File for Meter ID : "+ str(self.meterFile.id))
+    def finalOutputFileMeterId(self):
+        return(str(self.meterFile.id))

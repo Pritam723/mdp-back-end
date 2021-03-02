@@ -17,9 +17,8 @@ def generateMwhHeader(_meterHeaderData,_nextMeterHeaderData,_meterId,_meterName,
     reactiveLowDiff = f'{((float(_nextMeterHeaderData[3]) - float(_meterHeaderData[3]))*_ctr*_ptr)/1000000 :.1f}'
 
     # Adjusting the spaces
-    _mwhHeaderData = [_meterId," "+_meterName," "*3 + _headerDate," "*(14 - len(actDiff)) + actDiff," "*(11 - len(reactiveHighDiff)) + reactiveHighDiff," "*(9 - len(reactiveLowDiff)) + reactiveLowDiff]
+    _mwhHeaderData = [_meterId," "+_meterName," "*3 + _headerDate," "*decideSpace(14,actDiff) + actDiff," "*decideSpace(11,reactiveHighDiff) + reactiveHighDiff," "*decideSpace(9,reactiveLowDiff) + reactiveLowDiff]
     return(_mwhHeaderData)
-
 
 def spaceAdjustment(_part) :
     spaceAdjustedPart = []
@@ -27,34 +26,38 @@ def spaceAdjustment(_part) :
         if(i == 0) :
             spaceAdjustedPart.append(_part[i])
         elif(i == 1) :
-            spaceAdjustedPart.append(" "*(16-len(_part[i])) + _part[i])
+            spaceAdjustedPart.append(" "*decideSpace(16,_part[i]) + _part[i])
         else :
-            spaceAdjustedPart.append(" "*(18-len(_part[i])) + _part[i])
+            spaceAdjustedPart.append(" "*decideSpace(18,_part[i]) + _part[i])
     return spaceAdjustedPart
 
 
-def dirJsonRealMeterMWH(path0,nPath,_meterData,mwhDict):
+def dirJsonRealMeterMWH(nPath,_meterData,mwhDict):
     d = {'name': os.path.basename(nPath)}
-    # d['size'] = str("{0:.2f}".format((os.stat(path0).st_size / 1024)) + "KB")
-    if os.path.isdir(path0):
+    # d['size'] = str("{0:.2f}".format((os.stat(nPath).st_size / 1024)) + "KB")
+    if os.path.isdir(nPath):
         d['type'] = "folder"
-        d['path'] = nPath
-        d['files'] = [dirJsonRealMeterMWH(os.path.join(path0, x),os.path.join(nPath, x),_meterData,mwhDict) for x in os.listdir(path0)]
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+        d['files'] = [dirJsonRealMeterMWH(os.path.join(nPath, x),_meterData,mwhDict) for x in os.listdir(nPath)]
     else:
         print(os.path.basename(nPath))
         d['id'] = mwhDict['lastIndex']
-        mwhDict[mwhDict['lastIndex']] = nPath
+        mwhDict[mwhDict['lastIndex']] = os.path.relpath(nPath, 'fifteenmmdp/media')
         mwhDict['lastIndex'] = mwhDict['lastIndex'] + 1
         
         d['type'] = "file"
-        d['path'] = nPath
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
 
     return d
 
 def createRealMeterMWH(path,_meterData) :
     print("i am in createRealMeterMWH " + path)
-    meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile",path) #Later "Validated File" path is added
-    relativeFilePathCopy = meterFileMainFolder+'/Real Meter MWH Files(Copy)/'
+
+    meterFileMainFolder = os.path.join("fifteenmmdp/media/meterFile",path)
+
+    # meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile",path) #Later "Validated File" path is added
+    
+    # relativeFilePathCopy = meterFileMainFolder+'/Real Meter MWH Files(Copy)/'
     relativeFilePath = meterFileMainFolder+'/Real Meter MWH Files/'
 
     if not os.path.exists(meterFileMainFolder +'/Real Meter MWH Files(Copy)'): 
@@ -197,12 +200,12 @@ def createRealMeterMWH(path,_meterData) :
             mwhFile = mwhFile.reset_index(drop=True)
             #print(mwhFile)
             
-            if not os.path.exists(relativeFilePathCopy+headerDate+"/"):
-                os.makedirs(relativeFilePathCopy+headerDate+"/")
+            # if not os.path.exists(relativeFilePathCopy+headerDate+"/"):
+            #     os.makedirs(relativeFilePathCopy+headerDate+"/")
             if not os.path.exists(relativeFilePath+headerDate+"/"):
                 os.makedirs(relativeFilePath+headerDate+"/")
 
-            mwhFile.to_csv(relativeFilePathCopy + headerDate + "/" + meterName +'.MWH', header=False, index=None)
+            # mwhFile.to_csv(relativeFilePathCopy + headerDate + "/" + meterName +'.MWH', header=False, index=None)
             mwhFile.to_csv(relativeFilePath + headerDate + "/" + meterName +'.MWH', header=False, index=None)
             
             if meterName == masterFreqMeter['Meter_No'] :
@@ -210,7 +213,7 @@ def createRealMeterMWH(path,_meterData) :
                 masterFreq = masterFreq.append(pd.Series(''.join('Master Frequency Data for the date: ' + headerDate)), ignore_index=True)
 
                 masterFreq = masterFreq.append(pd.Series(' '.join(frequencyData)), ignore_index=True)
-                masterFreq.to_csv(relativeFilePathCopy + headerDate + '/masterFrequency.MFD', header=False, index=None)
+                # masterFreq.to_csv(relativeFilePathCopy + headerDate + '/masterFrequency.MFD', header=False, index=None)
                 masterFreq.to_csv(relativeFilePath + headerDate + '/masterFrequency.MFD', header=False, index=None)
 
                 print("Meter name : " + meterName + ". Freq : " + str(frequencyData))
@@ -223,16 +226,18 @@ def createRealMeterMWH(path,_meterData) :
 
     for elem in ((list(set(realMeterNotInDB)))) :
         print(elem)
+
     # print((len(realMeterNotInDB)))
     # print(len(set(realMeterNotInDB)))
-    realMeterMWHFilesCopyFolderPath = os.path.join("fifteenmmdp/media/meterFile",path,'Real Meter MWH Files(Copy)')
-    realMeterMWHFilesFolderPath = os.path.join("meterFile",path,'Real Meter MWH Files')
+
+    # realMeterMWHFilesCopyFolderPath = os.path.join("fifteenmmdp/media/meterFile",path,'Real Meter MWH Files(Copy)')
+    # realMeterMWHFilesFolderPath = os.path.join("meterFile",path,'Real Meter MWH Files')
     if(not (_meterData.status is None) and (statusCodes.index(_meterData.status) == 4)) :
         print("New realMeterMWHFile creation executed")
 
         mwhDict = {'lastIndex' : 1}
 
-        jsonOutput = dirJsonRealMeterMWH(os.path.splitext(realMeterMWHFilesCopyFolderPath)[0],os.path.splitext(realMeterMWHFilesFolderPath)[0],_meterData,mwhDict)
+        jsonOutput = dirJsonRealMeterMWH(os.path.splitext(relativeFilePath)[0],_meterData,mwhDict)
         print(json.dumps(jsonOutput))
         print(mwhDict)
         

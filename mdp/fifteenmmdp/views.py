@@ -5,6 +5,7 @@ import os
 import zipfile
 from django.conf import settings
 from datetime import datetime
+import shutil
 
 # Create your views here.
 from django.core.files import File
@@ -19,12 +20,15 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 # from .serializers import AllMeterFilesSerializer
 
-from .models import AllMeterFiles,NpcFile,MergedFile,DateFilteredFile,ValidatedFile,RealMeterMWHFile
+from .models import AllMeterFiles,NpcFile,MergedFile,DateFilteredFile,ValidatedFile,RealMeterMWHFile,FictMeterMWHFile,FinalOutputFile
 from .extract import dirJsonNPC
 from .merge import mergeNPCs
 from .dateFilter import dateFilterMergedFile
 from .validate import validateFile
 from .realMeterMWH import createRealMeterMWH
+from .fictMeterMWH import createFictMeterMWH
+from .finalOutput import createFinalOutput
+
 # from .extract import extractMeterFile
 from .supportingFunctions import *
 from django.core.files.storage import FileSystemStorage
@@ -522,5 +526,301 @@ def changeRealMeterMWHFile(request,meter_id,realMeterMWH_id):
     return HttpResponse({'message': 'RealMeterMWHFile Changed'}, status=200)
 
 
+def downLoadFullRealMeterMWHFiles(request,meter_id):
+    print("inside downLoadFullRealMeterMWHFiles")
+    print(meter_id)
 
-############################################################################
+    path = os.path.join(settings.MEDIA_ROOT,'meterFile/meterFile'+meter_id)
+    inputFile_path = os.path.join(path,'Real Meter MWH Files')
+    outputFile_path = os.path.join(path,'Real_Meter_MWH.zip')
+
+    shutil.make_archive(os.path.splitext(outputFile_path)[0], 'zip', inputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + 'Real_Meter_MWH.zip'
+            return response
+
+    return HttpResponse("There is no Real Meter MWH File to download")
+############################## Create Fictitious Meter MWH #################################################################
+
+@csrf_exempt
+def getFictMeterMWHData(request, meter_id):   # Data of single meter
+
+    print("inside getFictMeterMWHData")
+    print(meter_id)
+
+    fictMeterMWHFiles = list(filter(lambda fictMeterMWHFile: (fictMeterMWHFile.fictMeterMWHFileMeterId() == meter_id),FictMeterMWHFile.objects.all()))
+    # fictMeterMWHFile = fictMeterMWHFiles[0]
+    # fictMwhDict = json.loads(fictMeterMWHFile.fictMwhDictionary)
+    # print(fictMwhDict["1"])
+    fictMeterMWHFiles_json = serializers.serialize("json", fictMeterMWHFiles , fields=('dirStructureFictMWH','meterFile'))
+    # data = {"data": AllMeterFiles_json}
+    # return JsonResponse(data)
+    return HttpResponse(fictMeterMWHFiles_json, content_type="text/json-comment-filtered")
+
+
+@csrf_exempt
+def fictMeterMWH(request,meter_id):
+    # try :
+    print(meter_id)
+    meterFile = AllMeterFiles.objects.get(id=int(meter_id))
+    print(meterFile.status)
+    createFictMeterMWH(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
+    return HttpResponse({'message': 'Fict Meter MWH Created'}, status=200)
+    # except Exception as e :
+    #     return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
+
+@csrf_exempt
+def downloadFictMeterMWHFile(request,meter_id,fictMeterMWH_id):   # Single File only
+
+    print("inside downloadFictMeterMWHFile")
+    print(fictMeterMWH_id)
+    # fictMeterMWHFile = FictMeterMWHFile.objects.get(id=int(fictMeterMWH_id))
+
+    fictMeterMWHFiles = list(filter(lambda fictMeterMWHFile: (fictMeterMWHFile.fictMeterMWHFileMeterId() == meter_id),FictMeterMWHFile.objects.all()))
+    fictMeterMWHFile = fictMeterMWHFiles[0]
+    fictMwhDict = json.loads(fictMeterMWHFile.fictMwhDictionary)
+
+    outputFile_path = os.path.join(settings.MEDIA_ROOT,fictMwhDict[fictMeterMWH_id])
+    print(outputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="text/plain")
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(fictMwhDict[fictMeterMWH_id])
+            return response
+
+    return HttpResponse("There is no Fict Meter MWH File to download")
+
+
+@csrf_exempt
+def changeFictMeterMWHFile(request,meter_id,fictMeterMWH_id):
+
+    print("inside changeFictMeterMWHFile")
+    print(fictMeterMWH_id)
+
+    print(request.FILES['fileToUpload'])
+    myfile = request.FILES['fileToUpload']
+    # realMeterMWHFileToChange = RealMeterMWHFile.objects.get(id = realMeterMWH_id)
+    print(myfile)
+    print(myfile.name)
+    fictMeterMWHFiles = list(filter(lambda fictMeterMWHFile: (fictMeterMWHFile.fictMeterMWHFileMeterId() == meter_id),FictMeterMWHFile.objects.all()))
+    fictMeterMWHFile = fictMeterMWHFiles[0]
+    fictMwhDict = json.loads(fictMeterMWHFile.fictMwhDictionary)
+    print(fictMwhDict[fictMeterMWH_id])
+    # useThisLoc = 'fifteenmmdp/media'+fictMwhDict[fictMeterMWH_id]
+    useThisLoc = fictMwhDict[fictMeterMWH_id]
+
+    fs = OverwriteStorage()
+    fs.save(useThisLoc, myfile)
+    # realMeterMWHFileToChange.npcFile = request.FILES['fileToUpload']
+    # realMeterMWHFileToChange.save()
+    return HttpResponse({'message': 'FictMeterMWHFile Changed'}, status=200)
+
+def downLoadFullFictMeterMWHFiles(request,meter_id):
+    print("inside downLoadFullFictMeterMWHFiles")
+    print(meter_id)
+
+    path = os.path.join(settings.MEDIA_ROOT,'meterFile/meterFile'+meter_id)
+    inputFile_path = os.path.join(path,'Fictitious Meter MWH Files')
+    outputFile_path = os.path.join(path,'Fictitious_Meter_MWH.zip')
+
+    shutil.make_archive(os.path.splitext(outputFile_path)[0], 'zip', inputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + 'Fictitious_Meter_MWH.zip'
+            return response
+
+    return HttpResponse("There is no Fictitious Meter MWH File to download")
+
+############################## Create Final Output Files #################################################################
+
+
+
+@csrf_exempt
+def getRealMeterMWHData(request, meter_id):   # Data of single meter
+
+    print("inside getRealMeterMWHData")
+    print(meter_id)
+
+    realMeterMWHFiles = list(filter(lambda realMeterMWHFile: (realMeterMWHFile.realMeterMWHFileMeterId() == meter_id),RealMeterMWHFile.objects.all()))
+    # realMeterMWHFile = realMeterMWHFiles[0]
+    # mwhDict = json.loads(realMeterMWHFile.mwhDictionary)
+    # print(mwhDict["1"])
+    realMeterMWHFiles_json = serializers.serialize("json", realMeterMWHFiles , fields=('dirStructureRealMWH','meterFile'))
+    # data = {"data": AllMeterFiles_json}
+    # return JsonResponse(data)
+    return HttpResponse(realMeterMWHFiles_json, content_type="text/json-comment-filtered")
+
+
+@csrf_exempt
+def realMeterMWH(request,meter_id):
+    # try :
+    print(meter_id)
+    meterFile = AllMeterFiles.objects.get(id=int(meter_id))
+    print(meterFile.status)
+    createRealMeterMWH(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
+    return HttpResponse({'message': 'Real Meter MWH Created'}, status=200)
+    # except Exception as e :
+    #     return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
+
+@csrf_exempt
+def downloadRealMeterMWHFile(request,meter_id,realMeterMWH_id):   # Single File only
+
+    print("inside downloadRealMeterMWHFile")
+    print(realMeterMWH_id)
+    # realMeterMWHFile = RealMeterMWHFile.objects.get(id=int(realMeterMWH_id))
+
+    realMeterMWHFiles = list(filter(lambda realMeterMWHFile: (realMeterMWHFile.realMeterMWHFileMeterId() == meter_id),RealMeterMWHFile.objects.all()))
+    realMeterMWHFile = realMeterMWHFiles[0]
+    mwhDict = json.loads(realMeterMWHFile.mwhDictionary)
+
+    outputFile_path = os.path.join(settings.MEDIA_ROOT,mwhDict[realMeterMWH_id])
+    print(outputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="text/plain")
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(mwhDict[realMeterMWH_id])
+            return response
+
+    return HttpResponse("There is no Real Meter MWH File to download")
+
+
+@csrf_exempt
+def changeRealMeterMWHFile(request,meter_id,realMeterMWH_id):
+
+    print("inside changeRealMeterMWHFile")
+    print(realMeterMWH_id)
+
+    print(request.FILES['fileToUpload'])
+    myfile = request.FILES['fileToUpload']
+    # realMeterMWHFileToChange = RealMeterMWHFile.objects.get(id = realMeterMWH_id)
+    print(myfile)
+    print(myfile.name)
+    realMeterMWHFiles = list(filter(lambda realMeterMWHFile: (realMeterMWHFile.realMeterMWHFileMeterId() == meter_id),RealMeterMWHFile.objects.all()))
+    realMeterMWHFile = realMeterMWHFiles[0]
+    mwhDict = json.loads(realMeterMWHFile.mwhDictionary)
+    print(mwhDict[realMeterMWH_id])
+    # useThisLoc = 'fifteenmmdp/media'+mwhDict[realMeterMWH_id]
+    useThisLoc = mwhDict[realMeterMWH_id]
+
+    fs = OverwriteStorage()
+    fs.save(useThisLoc, myfile)
+    # realMeterMWHFileToChange.npcFile = request.FILES['fileToUpload']
+    # realMeterMWHFileToChange.save()
+    return HttpResponse({'message': 'RealMeterMWHFile Changed'}, status=200)
+
+
+def downLoadFullRealMeterMWHFiles(request,meter_id):
+    print("inside downLoadFullRealMeterMWHFiles")
+    print(meter_id)
+
+    path = os.path.join(settings.MEDIA_ROOT,'meterFile/meterFile'+meter_id)
+    inputFile_path = os.path.join(path,'Real Meter MWH Files')
+    outputFile_path = os.path.join(path,'Real_Meter_MWH.zip')
+
+    shutil.make_archive(os.path.splitext(outputFile_path)[0], 'zip', inputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + 'Real_Meter_MWH.zip'
+            return response
+
+    return HttpResponse("There is no Real Meter MWH File to download")
+############################## Create Fictitious Meter MWH #################################################################
+
+@csrf_exempt
+def getFinalOutputData(request, meter_id):   # Data of single meter
+
+    print("inside getFinalOutputData")
+    print(meter_id)
+
+    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.finalOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
+   
+    finalOutputFiles_json = serializers.serialize("json", finalOutputFiles , fields=('dirStructureFinalOutput','meterFile'))
+    # data = {"data": AllMeterFiles_json}
+    # return JsonResponse(data)
+    return HttpResponse(finalOutputFiles_json, content_type="text/json-comment-filtered")
+
+
+@csrf_exempt
+def finalOutput(request,meter_id):
+    # try :
+    print(meter_id)
+    meterFile = AllMeterFiles.objects.get(id=int(meter_id))
+    print(meterFile.status)
+    createFinalOutput(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
+    return HttpResponse({'message': 'Final Output Created'}, status=200)
+    # except Exception as e :
+    #     return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
+
+@csrf_exempt
+def downloadFinalOutputFile(request,meter_id,finalOutput_id):   # Single File only
+
+    print("inside downloadFinalOutputile")
+    print(finalOutput_id)
+
+    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.fianlOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
+    finalOutputFile = finalOutputFiles[0]
+    finalOutputDict = json.loads(finalOutputFile.finalOutputDictionary)
+
+    outputFile_path = os.path.join(settings.MEDIA_ROOT,finalOutputDict[finalOutput_id])
+    print(outputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="text/plain")
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(finalOutputDict[finalOutput_id])
+            return response
+
+    return HttpResponse("There is no Final Output File to download")
+
+
+@csrf_exempt
+def changeFinalOutputFile(request,meter_id,finalOutput_id):
+
+    print("inside changeFinalOutputFile")
+    print(finalOutput_id)
+
+    print(request.FILES['fileToUpload'])
+    myfile = request.FILES['fileToUpload']
+
+    print(myfile)
+    print(myfile.name)
+
+    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.fianlOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
+    finalOutputFile = finalOutputFiles[0]
+    finalOutputDict = json.loads(finalOutputFile.finalOutputDictionary)
+    print(finalOutputDict[finalOutput_id])
+    # useThisLoc = 'fifteenmmdp/media'+finalOutputDict[finalOutput_id]
+    useThisLoc = finalOutputDict[finalOutput_id]
+
+    fs = OverwriteStorage()
+    fs.save(useThisLoc, myfile)
+    # realMeterMWHFileToChange.npcFile = request.FILES['fileToUpload']
+    # realMeterMWHFileToChange.save()
+    return HttpResponse({'message': 'Final Output File Changed'}, status=200)
+
+def downLoadFullFinalOutputFiles(request,meter_id):
+    print("inside downLoadFullFinalOutputFiles")
+    print(meter_id)
+
+    path = os.path.join(settings.MEDIA_ROOT,'meterFile/meterFile'+meter_id)
+    inputFile_path = os.path.join(path,'Final Output Files')
+    outputFile_path = os.path.join(path,'Final_Output.zip')
+
+    shutil.make_archive(os.path.splitext(outputFile_path)[0], 'zip', inputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + 'Final_Output.zip'
+            return response
+
+    return HttpResponse("There is no Final Output File to download")

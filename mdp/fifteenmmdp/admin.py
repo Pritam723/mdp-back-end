@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AllMeterFiles,NpcFile,MergedFile,DateFilteredFile,ValidatedFile,RealMeterMWHFile
+from .models import AllMeterFiles,NpcFile,MergedFile,DateFilteredFile,ValidatedFile,RealMeterMWHFile,FictMeterMWHFile,FinalOutputFile
 
 # Register your models here.
 
@@ -10,3 +10,5 @@ admin.site.register(MergedFile)
 admin.site.register(DateFilteredFile)
 admin.site.register(ValidatedFile)
 admin.site.register(RealMeterMWHFile)
+admin.site.register(FictMeterMWHFile)
+admin.site.register(FinalOutputFile)
