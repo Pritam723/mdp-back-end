@@ -53,8 +53,22 @@ urlpatterns = [
 	path('realMeterMWH/<str:meter_id>', views.realMeterMWH, name = "realMeterMWH"),
 	path('changeRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.changeRealMeterMWHFile, name ="changeRealMeterMWHFile"),
 	path('downloadRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.downloadRealMeterMWHFile, name ="downloadRealMeterMWHFile"),
-    
+	path('downLoadFullRealMeterMWHFiles/<str:meter_id>', views.downLoadFullRealMeterMWHFiles, name ="downLoadFullRealMeterMWHFiles"),
 
+
+	path('getFictMeterMWHData/<str:meter_id>', views.getFictMeterMWHData, name ="getFictMeterMWHData"),
+	path('fictMeterMWH/<str:meter_id>', views.fictMeterMWH, name = "fictMeterMWH"),
+	path('changeFictMeterMWHFile/<str:meter_id>/<str:fictMeterMWH_id>', views.changeFictMeterMWHFile, name ="changeFictMeterMWHFile"),
+	path('downloadFictMeterMWHFile/<str:meter_id>/<str:fictMeterMWH_id>', views.downloadFictMeterMWHFile, name ="downloadFictMeterMWHFile"),
+	path('downLoadFullFictMeterMWHFiles/<str:meter_id>', views.downLoadFullFictMeterMWHFiles, name ="downLoadFullFictMeterMWHFiles"),
+
+
+	path('getFinalOutputData/<str:meter_id>', views.getFinalOutputData, name ="getFinalOutputData"),
+	path('finalOutput/<str:meter_id>', views.finalOutput, name = "finalOutput"),
+	path('changeFinalOutputFile/<str:meter_id>/<str:finalOutput_id>', views.changeFinalOutputFile, name ="changeFinalOutputFile"),
+	path('downloadFinalOutputFile/<str:meter_id>/<str:finalOutput_id>', views.downloadFinalOutputFile, name ="downloadFinalOutputFile"),
+	path('downLoadFullFinalOutputFiles/<str:meter_id>', views.downLoadFullFinalOutputFiles, name ="downLoadFullFinalOutputFiles"),
+    
 
     url(r'^download/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
 

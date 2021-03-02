@@ -18,7 +18,6 @@ def mergeNPCs(path,_meterData):
     for file_path in Path(os.path.join(meterFileMainFolder,"NPC Files")).glob('**/*.npc'):  #Takes care of all case insensitive .NPC files.
     #     count =  count + 1
         npcFileList.append(str(file_path))    
-        
     # print(npcFileList)
     print(len(npcFileList))
     # print(count)

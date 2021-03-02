@@ -79,7 +79,6 @@ def isSevenEightDigitFloat(value):
         return False
     
 def isDate(value) :
-    from datetime import datetime
     datePattern = re.compile(r'^[0-9]{2}-[0-9]{2}-[0-9]{2}$')
     result = re.match(datePattern, value)
     if(result is None) :
@@ -89,7 +88,8 @@ def isDate(value) :
         return True
     except ValueError:
         return False
-    
+
+
 def isTime(value) :
     import time
     timePattern = re.compile(r'^[0-2][0-9][0-5][0-9]$')
@@ -144,6 +144,7 @@ def getDfInfo(_weekList,_meterHeaderList) :
         informationDict[_weekList[weekHeaderIndex]].append(_weekList[weekHeaderIndex+1])
     return(informationDict)
 
+
 #############################################################################################################################################
 
 
@@ -151,7 +152,6 @@ def getDfInfo(_weekList,_meterHeaderList) :
 
 # ************************************************ Helps Extract *******************************************************
 # No function yet
-# *************************************************************************************************************************
 
 # ************************************************ Helps DateFilter *******************************************************
 
@@ -254,5 +254,11 @@ def weekHeaderCheck(rowList) :
     return {"message" : "All checked." , "status" : True}
 
 # ************************************************ Helps Real Meter MWH Creation *****************************************
+
+# ************************************************ Helps Fictitious Meter MWH Creation *****************************************
+
+def decideSpace(spaceValue,stringToCheck) :
+    spaceOffset = max(spaceValue,len(stringToCheck)+1)
+    return spaceOffset - len(stringToCheck)
 
 #############################################################################################################################################
