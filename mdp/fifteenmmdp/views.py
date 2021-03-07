@@ -807,6 +807,7 @@ def changeFinalOutputFile(request,meter_id,finalOutput_id):
     # realMeterMWHFileToChange.save()
     return HttpResponse({'message': 'Final Output File Changed'}, status=200)
 
+@csrf_exempt
 def downLoadFullFinalOutputFiles(request,meter_id):
     print("inside downLoadFullFinalOutputFiles")
     print(meter_id)
@@ -824,3 +825,8 @@ def downLoadFullFinalOutputFiles(request,meter_id):
             return response
 
     return HttpResponse("There is no Final Output File to download")
+
+@csrf_exempt
+def getNecessaryFiles(request) :
+    # necessaryFiles_json = serializers.serialize("json", necessaryFiles)
+    return HttpResponse(json.dumps(necessaryFiles), content_type="application/json")

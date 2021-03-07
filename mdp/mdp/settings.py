@@ -26,7 +26,7 @@ SECRET_KEY = '2ff)0^sr+g_0es-$)(sj^1hsfl(%(!+el(eczo00^+f%m^#-)&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.3.101.90','mp.erldc.net', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['10.3.101.90','10.3.101.238','mp.erldc.net', 'localhost', '127.0.0.1']
 
 
 # Application definition
