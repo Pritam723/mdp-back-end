@@ -70,6 +70,8 @@ urlpatterns = [
 	path('downLoadFullFinalOutputFiles/<str:meter_id>', views.downLoadFullFinalOutputFiles, name ="downLoadFullFinalOutputFiles"),
     
 	path('getNecessaryFiles', views.getNecessaryFiles, name ="getNecessaryFiles"),
+	path('downLoadNecessaryFile/<str:necessaryFileId_id>', views.downLoadNecessaryFile, name ="downLoadNecessaryFile"),
+	path('changeNecessaryFile/<str:necessaryFileId_id>', views.changeNecessaryFile, name ="changeNecessaryFile"),
 
     url(r'^download/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
 

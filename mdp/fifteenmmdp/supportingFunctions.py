@@ -7,43 +7,7 @@ from datetime import datetime,timedelta
 ###################################################  Global Variables #######################################################################
 checkTimeStamp = ['00','04','08','12','16','20']
 statusCodes =  ['Uploaded' , 'Extracted' , 'Merged' , 'DateFiltered','Verified', 'MWHCreated', 'FictCreated' , 'FinalOutputCreated' ]
-necessaryFiles = [
-  {
-    "fileId": 1,
-    "fileName": "master.dat",
-    "path": "necessaryFiles\\master.dat",
-    "subTitle": "Details of Real meters",
-    "description": "test1",
-  },
-  {
-    "fileId": 2,
-    "fileName": "FICTMTRS.DAT",
-    "path": "necessaryFiles\\FICTMTRS.DAT",
-    "subTitle": "Details of Fictitious meters",
-    "description": "test2",
-  },
-  {
-    "fileId": 3,
-    "fileName": "ConfigurationFile.xlsx",
-    "path": "necessaryFiles\\ConfigurationFile.xlsx",
-    "subTitle": "XLSX file for all the Configuration",
-    "description": "test3",
-  },
-  {
-    "fileId": 4,
-    "fileName": "FICTMTRS.CFG",
-    "path": "necessaryFiles\\FICTMTRS.CFG",
-    "subTitle": "Definition of all fictitious meters",
-    "description": "test4",
-  },
-  {
-    "fileId": 5,
-    "fileName": "FRQMASTR.dat",
-    "path": "necessaryFiles\\FRQMASTR.dat",
-    "subTitle": "Master frequency details",
-    "description": "test5",
-  },
-]
+
 #############################################################################################################################################
 
 
@@ -299,3 +263,41 @@ def decideSpace(spaceValue,stringToCheck) :
     return spaceOffset - len(stringToCheck)
 
 #############################################################################################################################################
+# Later use
+# necessaryFiles = [
+#   {
+#     "fileId": 1,
+#     "fileName": "master.dat",
+#     "path": "necessaryFiles\\master.dat",
+#     "subTitle": "Details of Real meters",
+#     "description": "test1",
+#   },
+#   {
+#     "fileId": 2,
+#     "fileName": "FICTMTRS.DAT",
+#     "path": "necessaryFiles\\FICTMTRS.DAT",
+#     "subTitle": "Details of Fictitious meters",
+#     "description": "test2",
+#   },
+#   {
+#     "fileId": 3,
+#     "fileName": "ConfigurationFile.xlsx",
+#     "path": "necessaryFiles\\ConfigurationFile.xlsx",
+#     "subTitle": "XLSX file for all the Configuration",
+#     "description": "test3",
+#   },
+#   {
+#     "fileId": 4,
+#     "fileName": "FICTMTRS.CFG",
+#     "path": "necessaryFiles\\FICTMTRS.CFG",
+#     "subTitle": "Definition of all fictitious meters",
+#     "description": "test4",
+#   },
+#   {
+#     "fileId": 5,
+#     "fileName": "FRQMASTR.dat",
+#     "path": "necessaryFiles\\FRQMASTR.dat",
+#     "subTitle": "Master frequency details",
+#     "description": "test5",
+#   },
+# ]
