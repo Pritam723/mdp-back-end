@@ -145,7 +145,7 @@ def dateFilterMergedFile(path,_meterData) :
     
     realMeterInfo = []
     allMeterNumbers = []
-    masterData = open(settings.MEDIA_ROOT+'/configFile/master.dat', "r")
+    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :

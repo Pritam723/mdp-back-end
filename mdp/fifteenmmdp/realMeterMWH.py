@@ -67,7 +67,7 @@ def createRealMeterMWH(path,_meterData) :
 
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/configFile/master.dat', "r")
+    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -100,7 +100,7 @@ def createRealMeterMWH(path,_meterData) :
 
     # Reading Master Frequency Info
     masterFreqMeter = {"Loc_Id" : '' , "Meter_No" : '' , "ctr" : 0 , "ptr" : 0 }
-    masterFreqData = open(settings.MEDIA_ROOT+'/configFile/FRQMASTR.dat', "r")
+    masterFreqData = open(settings.MEDIA_ROOT+'/necessaryFiles/FRQMASTR.dat', "r")
     masterFreqDataList = masterFreqData.readlines()
     masterFreqData.close()
     for elem in masterFreqDataList :

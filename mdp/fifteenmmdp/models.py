@@ -62,6 +62,10 @@ def upload_path_npc(instance, filename):
     # return '/'.join(['meterFile', 'meterFile' + str(instance.id),'Merged File', filename])
     return instance.filePath
 
+def upload_path_necessaryFile(instance, filename):
+    # return '/'.join(['necessaryFiles', filename])
+    return instance.filePath
+
 class NpcFile(models.Model):
     id = models.AutoField(primary_key=True)
     
@@ -148,3 +152,15 @@ class FinalOutputFile(models.Model):
         return("Final Output File for Meter ID : "+ str(self.meterFile.id))
     def finalOutputFileMeterId(self):
         return(str(self.meterFile.id))
+
+class NecessaryFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    
+    fileName = models.CharField(max_length=1023,null=True)
+    filePath = models.CharField(max_length=1023,null=True)
+    subTitle = models.TextField(null=True)
+    description = models.TextField(null=True)
+    necessaryFile = models.FileField(upload_to = upload_path_necessaryFile,max_length=1023,storage=OverwriteStorage())
+
+    def __str__(self):
+        return(str(self.fileName))

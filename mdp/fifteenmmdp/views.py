@@ -20,7 +20,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 # from .serializers import AllMeterFilesSerializer
 
-from .models import AllMeterFiles,NpcFile,MergedFile,DateFilteredFile,ValidatedFile,RealMeterMWHFile,FictMeterMWHFile,FinalOutputFile
+from .models import *
 from .extract import dirJsonNPC
 from .merge import mergeNPCs
 from .dateFilter import dateFilterMergedFile
@@ -64,7 +64,7 @@ def apiOverview(request):
 ####################### Zipped Meter Data ####################################################################
 @csrf_exempt
 def getAllMeterData(request):
-    AllMeterFiles_json = AllMeterFiles.objects.all()
+    # AllMeterFiles_json = AllMeterFiles.objects.all()
     AllMeterFiles_json = serializers.serialize("json", AllMeterFiles.objects.all())
     # data = {"data": AllMeterFiles_json}
     # return JsonResponse(data)
@@ -807,6 +807,7 @@ def changeFinalOutputFile(request,meter_id,finalOutput_id):
     # realMeterMWHFileToChange.save()
     return HttpResponse({'message': 'Final Output File Changed'}, status=200)
 
+@csrf_exempt
 def downLoadFullFinalOutputFiles(request,meter_id):
     print("inside downLoadFullFinalOutputFiles")
     print(meter_id)
@@ -824,3 +825,41 @@ def downLoadFullFinalOutputFiles(request,meter_id):
             return response
 
     return HttpResponse("There is no Final Output File to download")
+
+############################## Necessary Files #################################################################
+
+@csrf_exempt
+def getNecessaryFiles(request) :
+    # necessaryFiles_json = serializers.serialize("json", necessaryFiles)
+    # return HttpResponse(json.dumps(necessaryFiles), content_type="application/json")
+
+    NecessaryFiles_json = serializers.serialize("json", NecessaryFile.objects.all())
+
+    return HttpResponse(NecessaryFiles_json, content_type="text/json-comment-filtered")
+
+
+@csrf_exempt
+def downLoadNecessaryFile(request,necessaryFileId_id):
+    print("inside downLoadNecessaryFile")
+    print(necessaryFileId_id)
+
+    necessaryFile = NecessaryFile.objects.get(id=int(necessaryFileId_id))
+
+    outputFile_path = os.path.join(settings.MEDIA_ROOT,necessaryFile.filePath)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + necessaryFile.fileName
+            return response
+
+    return HttpResponse("There is no File to download")
+
+@csrf_exempt
+def changeNecessaryFile(request,necessaryFileId_id):
+    print("does work")
+    print(request.POST['subTitle'])
+    print(request.POST['description'])
+    print(request.FILES['necessaryFile'])
+
+    

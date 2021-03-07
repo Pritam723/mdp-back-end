@@ -117,7 +117,7 @@ def createFictMeterMWH(path,_meterData) :
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/configFile/master.dat', "r")
+    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -153,7 +153,7 @@ def createFictMeterMWH(path,_meterData) :
     
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'/configFile/FICTMTRS.dat', "r")
+    fictInfoData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
     
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -196,7 +196,7 @@ def createFictMeterMWH(path,_meterData) :
     # fictMeterDict['(BM-99)'] gives      -(BI-09)*0.97899. trim spaces later. \n trimmed
 
 
-    fctCFG = open(settings.MEDIA_ROOT+'/configFile/FICTMTRS.CFG', "r")
+    fctCFG = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.CFG', "r")
     fList = fctCFG.readlines()
     # print(len(fList[len(fList)-2]))
     # print((fList[len(fList)-2])[:3])
@@ -467,7 +467,7 @@ def createFictMeterMWH(path,_meterData) :
     # For Loc_Id to MeterName conversion & opposite, we will use fictMeterInfo & realMeterInfo
     # undefinedFictMetConf : Will have those fictmeter IDs which has no equation defined in CFG file i.e. no entry in fictMeterDict.
 
-    fctData = open(settings.MEDIA_ROOT+'/configFile/FICTMTRS.dat', "r")
+    fctData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
     fctDataList = fctData.readlines()
     fctData.close()
     undefinedFictMetConf = []

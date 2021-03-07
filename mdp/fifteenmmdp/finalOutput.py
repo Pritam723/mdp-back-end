@@ -68,7 +68,7 @@ def transposeSpaceadjusted(l1,eqs,si):
     l2 = []
     # iterate over list l1 to the length of an item 
     for i in range(len(l1[0])):
-        print(i)
+        # print(i)
         row =[]
     #         print(l1)
         for itemIndex,item in enumerate(l1):
@@ -89,19 +89,19 @@ def transposeSpaceadjusted(l1,eqs,si):
     return l2
 
 def signSpaceAdjusted(_totalSummaryData,eqs,si) :
-    print(_totalSummaryData)
-    print(eqs)
-    print(si)
+    # print(_totalSummaryData)
+    # print(eqs)
+    # print(si)
     _returnTotalSummary = []
     for itemIndex,item in enumerate(_totalSummaryData) :
-        print(str(itemIndex) + "hi " + eqs[itemIndex])
+        # print(str(itemIndex) + "hi " + eqs[itemIndex])
         if(eqs[itemIndex].strip() == 'TIME' or eqs[itemIndex].strip() == 'DATE' or eqs[itemIndex].strip() == 'FREQ') :
-            print(item + " inside if")
+            # print(item + " inside if")
 
             item = " " * (si[itemIndex] - len(item)) + item
             _returnTotalSummary.append(item)
         else :
-            print(item + " inside else")
+            # print(item + " inside else")
 
             if(item[0] != '-') :
                 item = '+' + item
@@ -115,7 +115,7 @@ def dirJsonFinalOutput(nPath,_meterData,finalOutputDict):
     if os.path.isdir(nPath):
         d['type'] = "folder"
         d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
-        d['files'] = [dirJsonFictMeterMWH(os.path.join(nPath, x),_meterData,finalOutputDict) for x in os.listdir(nPath)]
+        d['files'] = [dirJsonFinalOutput(os.path.join(nPath, x),_meterData,finalOutputDict) for x in os.listdir(nPath)]
     else:
 
         print(os.path.basename(nPath))
@@ -141,7 +141,7 @@ def createFinalOutput(path,_meterData):
 
     fictMeterMWHPath = meterFileMainFolder+'/Fictitious Meter MWH Files/'
     realMeterMWHPath = meterFileMainFolder+'/Real Meter MWH Files/'
-
+    relativeFilePath = meterFileMainFolder+'/Final Output Files/'
     mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
 
     # if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
@@ -153,7 +153,7 @@ def createFinalOutput(path,_meterData):
 
     # [{'Loc_Id': 'FK-01', 'Meter_No': 'ER-1649-A', 'ctr': '500', 'ptr': '3636.3636'} ,{'Loc_Id': 'FK-02', 'Meter_No': 'ER-1646-A', 'ctr': '500', 'ptr': '3636.3636'}]
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/configFile/master.dat', "r")
+    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -188,7 +188,7 @@ def createFinalOutput(path,_meterData):
     
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'/configFile/FICTMTRS.dat', "r")
+    fictInfoData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
     
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -466,7 +466,7 @@ def createFinalOutput(path,_meterData):
 
     ################################################### Performing main operation #######################################
     
-    with open(settings.MEDIA_ROOT+'/configFile/newCFGUpdated.xlsx', "rb") as f: # input the .xlsx
+    with open(settings.MEDIA_ROOT+'/necessaryFiles/newCFGUpdated.xlsx', "rb") as f: # input the .xlsx
         data = pd.read_excel(f,sheet_name="Configuration",engine='openpyxl',header = None)
         f.close()
         
@@ -545,8 +545,8 @@ def createFinalOutput(path,_meterData):
                 freq = frData[0][1].split()
             else :
                 freq = ['--']*96
-        ##################################### Working with the outpt ###################################################################
-        ################################## Header Fill #############################################################################
+            ##################################### Working with the outpt ###################################################################
+            ################################## Header Fill #############################################################################
 
             configurationOutput = pd.Series([],dtype=object)
             configurationOutput = configurationOutput.append(pd.Series(' '), ignore_index=True)
@@ -558,14 +558,13 @@ def createFinalOutput(path,_meterData):
 
             configurationOutput = configurationOutput.append(pd.Series('-'*sum(spacingInfo)), ignore_index=True)
 
-        ################################## Header Done #############################################################################
-        ################################## Body Fill ###############################################################################
+            ################################## Header Done #############################################################################
+            ################################## Body Fill ###############################################################################
             rowWiseData = [0]*len(equations)
             totalSummaryData = [0]*len(equations)
 
             for equationIndex, equation in enumerate(equations):
-
-    #             print((equationIndex, equation))
+                #print((equationIndex, equation))
 
                 if(equation.strip() == 'TIME' or equation.strip() == 'DATE' or equation.strip() == 'FREQ') :
                     if(equation.strip() == 'TIME') : 
@@ -583,9 +582,9 @@ def createFinalOutput(path,_meterData):
                         equation = equation.replace(u'\xa0', u'') # Non breaking space.
                         equation = equation.replace('\t','')
                         equation = equation.replace('\n','')
-    #                     print('after trim')
-    #                     print(equation)
-    #                     print(len(equation))
+                        # print('after trim')
+                        # print(equation)
+                        # print(len(equation))
 
                         if(equation[0] == '+' or equation[0] == '-') :
                             equation = '0' + equation
@@ -593,7 +592,7 @@ def createFinalOutput(path,_meterData):
                         equation = re.sub('([A-Z]{2})-([0-9]{2})', r'\1_\2', equation)
 
                         df = evaluate("XY-99",mwhDate,equation)
-                        print(df)
+                        # print(df)
                         # Check if df is a series or float now. Act accordingly.
 
                         fullDayData = []
@@ -602,35 +601,56 @@ def createFinalOutput(path,_meterData):
                             fullDayData = fullDayData + [f'{float(x) :.6f}' for x in df[hour].split()[1:]]
                             hour += 1
                         print("append fullDayData in rowWiseData")
-                        print(fullDayData)
+                        # print(fullDayData)
                         rowWiseData[equationIndex] = fullDayData
                         totalSummaryData[equationIndex] = f'{sum([float(x) for x in fullDayData]) :.6f}'
-            #        ************************** We must assign sign too ***************************
+                #        ************************** We must assign sign too ***************************
                     except FileNotFoundError as fnfe :
                         rowWiseData[equationIndex] = ['--']*96
                         totalSummaryData[equationIndex] = '--'
                     except :
-                        print("Different error for "+configName)
+                        print("Got error for "+configName)
 
-    #         for p in (rowWiseData) :
-    #             print(p)
-    #         print(totalSummaryData)
-    #         print("sending rowwise data")
-    #         print(rowWiseData)
+            #         for p in (rowWiseData) :
+            #             print(p)
+            #         print(totalSummaryData)
+            #         print("sending rowwise data")
+            #         print(rowWiseData)
             colWiseData = transposeSpaceadjusted(rowWiseData,equations,spacingInfo)
             for colData in colWiseData :
                 configurationOutput = configurationOutput.append(pd.Series("".join(colData)), ignore_index=True)
 
-        ################################## Body Done #############################################################################
-        ################################## Footer Fill ##########################################################################
+            ################################## Body Done #############################################################################
+            ################################## Footer Fill ##########################################################################
             configurationOutput = configurationOutput.append(pd.Series('-'*sum(spacingInfo)), ignore_index=True)
             totalSummaryData = signSpaceAdjusted(totalSummaryData,equations,spacingInfo)
             configurationOutput = configurationOutput.append(pd.Series("".join(totalSummaryData)), ignore_index=True)
-    #         g = [e for e in list(map(lambda x,y: " " * (y - len(x)) + x , totalSummaryData, spacingInfo))]
+            #         g = [e for e in list(map(lambda x,y: " " * (y - len(x)) + x , totalSummaryData, spacingInfo))]
             configurationOutput = configurationOutput.append(pd.Series('-'*sum(spacingInfo)), ignore_index=True)
 
-        ################################## Footer Done ##########################################################################
-        ################################### Output ##############################################################################
+            ################################## Footer Done ##########################################################################
+            ################################### Output ##############################################################################
             configurationOutput = configurationOutput.reset_index(drop=True)
             # configurationOutput.to_csv('mySEMBASE/MWH/'+ mwhDate.replace('-','') + "." + extension, header=False, index=None)
             configurationOutput.to_csv(meterFileMainFolder + '/Final Output Files/' + mwhDate + "/" + mwhDate.replace('-','') + "." + extension, header=False, index=None)
+    print("Job Done")
+
+
+    if(not (_meterData.status is None) and (statusCodes.index(_meterData.status) == 6)) :
+        print("New filnalOutputFile creation executed")
+
+        finalOutputDict = {'lastIndex' : 1}
+
+        jsonOutput = dirJsonFinalOutput(os.path.splitext(relativeFilePath)[0],_meterData,finalOutputDict)
+        print(json.dumps(jsonOutput))
+        print(finalOutputDict)
+        
+        finalOutputFileObject = FinalOutputFile.objects.create(finalOutputDictionary = json.dumps(finalOutputDict),dirStructureFinalOutput=json.dumps(jsonOutput), meterFile = _meterData)
+        finalOutputFileObject.save()
+
+        AllMeterFiles.objects.filter(id = _meterData.id).update(status="FinalOutputCreated")
+
+    ct2 = datetime.now()
+    print(str(ct2-ct1))
+    print(ct1)
+    print(ct2)
