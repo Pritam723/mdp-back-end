@@ -6,7 +6,7 @@ import zipfile
 from django.conf import settings
 from datetime import datetime
 import shutil
-
+import pandas as pd
 # Create your views here.
 from django.core.files import File
 
@@ -28,6 +28,8 @@ from .validate import validateFile
 from .realMeterMWH import createRealMeterMWH
 from .fictMeterMWH import createFictMeterMWH
 from .finalOutput import createFinalOutput
+from .analyseData import fetchData
+from .changeMeterDataAnalyse import changeMeterEndDataWithEquation
 
 # from .extract import extractMeterFile
 from .supportingFunctions import *
@@ -47,7 +49,6 @@ class OverwriteStorage(FileSystemStorage):
 ######################### Testing ##########################################################################
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
-
 
 @api_view(['GET'])
 def apiOverview(request):
@@ -751,14 +752,14 @@ def getFinalOutputData(request, meter_id):   # Data of single meter
 
 @csrf_exempt
 def finalOutput(request,meter_id):
-    # try :
-    print(meter_id)
-    meterFile = AllMeterFiles.objects.get(id=int(meter_id))
-    print(meterFile.status)
-    createFinalOutput(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
-    return HttpResponse({'message': 'Final Output Created'}, status=200)
-    # except Exception as e :
-    #     return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
+    try :
+        print(meter_id)
+        meterFile = AllMeterFiles.objects.get(id=int(meter_id))
+        print(meterFile.status)
+        createFinalOutput(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
+        return HttpResponse({'message': 'Final Output Created'}, status=200)
+    except Exception as e :
+        return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
 
 @csrf_exempt
 def downloadFinalOutputFile(request,meter_id,finalOutput_id):   # Single File only
@@ -766,7 +767,7 @@ def downloadFinalOutputFile(request,meter_id,finalOutput_id):   # Single File on
     print("inside downloadFinalOutputile")
     print(finalOutput_id)
 
-    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.fianlOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
+    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.finalOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
     finalOutputFile = finalOutputFiles[0]
     finalOutputDict = json.loads(finalOutputFile.finalOutputDictionary)
 
@@ -794,7 +795,7 @@ def changeFinalOutputFile(request,meter_id,finalOutput_id):
     print(myfile)
     print(myfile.name)
 
-    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.fianlOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
+    finalOutputFiles = list(filter(lambda finalOutputFile: (finalOutputFile.finalOutputFileMeterId() == meter_id),FinalOutputFile.objects.all()))
     finalOutputFile = finalOutputFiles[0]
     finalOutputDict = json.loads(finalOutputFile.finalOutputDictionary)
     print(finalOutputDict[finalOutput_id])
@@ -825,6 +826,81 @@ def downLoadFullFinalOutputFiles(request,meter_id):
             return response
 
     return HttpResponse("There is no Final Output File to download")
+
+############################## Analyse data #################################################################
+@csrf_exempt
+def analyseData(request,meter_id):
+    try :
+        print("Analyse data")
+
+        with open("fifteenmmdp/media/necessaryFiles/GraphConfiguration.xlsx", "rb") as f: # input the .xlsx
+            data = pd.read_excel(f,sheet_name=None,engine='openpyxl')
+            f.close()
+
+        stateWiseFeederDetails = {}
+
+        print(len(data.keys()))
+        for key in data.keys() :
+            data[key] = data[key].fillna("Meter not specified")
+            stateWiseFeederDetails[key] = []
+            # print(data[key])
+
+        # stateWiseFeederDetails = {'BIHAR' : [] , 'WEST BENGAL' : [] , 'GRIDCO' : [] , 'DVC' : [] , 'SIKKIM' : [] , 'JHARKHAND' : []}
+        entities = stateWiseFeederDetails.keys()
+
+        for entity in entities :
+            for index, row in data[entity].iterrows():
+                feederObject = {'id' : row['SL NO'] , 'Feeder Name' : row['Feeder Name'] , 'End1' : row['End1'], 'End2' : row['End2'] }
+                stateWiseFeederDetails[entity].append(feederObject)
+        
+        # with open(r'fifteenmmdp/media/necessaryFiles/Graph Configuration.xlsx', "rb") as f: # input the .xlsx
+        #     data = pd.read_excel(f,sheet_name="WEST BENGAL",engine='openpyxl')
+        #     f.close()
+        # print(data)
+
+        
+        # for index, row in data.iterrows():
+        #     feederObject = {'id' : row['SL NO'] , 'Feeder Name' : row['Feeder Name'] , 'End1' : row['End1'], 'End2' : row['End2'] }
+        #     stateWiseFeederDetails['WEST BENGAL'].append(feederObject)
+
+        print(stateWiseFeederDetails)
+        return HttpResponse(json.dumps(stateWiseFeederDetails), content_type="application/json")
+
+        # return HttpResponse({'message': 'ANALYSE DATA'}, status=200)
+    except Exception as e :
+        return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
+
+@csrf_exempt
+def fetchGraphData(request,meter_id,end1,end2,polarity):
+    print(meter_id)
+    print(end1)
+    print(end2)
+    print(polarity)
+    graphData = fetchData(meter_id,end1,end2,polarity)
+    return HttpResponse(json.dumps(graphData), content_type='application/json')
+
+
+@csrf_exempt
+def fetchDateInfo(request,meter_id):
+    print("this is fetchDateInfo")
+    print(meter_id)
+
+    meterData = AllMeterFiles.objects.get(id=int(meter_id))
+
+    # One day is substracted because Real Meter MWH Files only got created for these days.
+    dateInformation = {'startDate' : str(meterData.startDate) , 'endDate' : str(meterData.endDate - timedelta(days=1))}
+ 
+    return HttpResponse(json.dumps(dateInformation), content_type="text/json-comment-filtered")
+
+@csrf_exempt
+def changeMeterEndData(request,meter_id):
+    startDate = request.POST['startDate']
+    endDate = request.POST['endDate']
+    meterEndToReplace = request.POST['meterEndToReplace']
+    equationToReplaceWith = request.POST['equationToReplaceWith']
+    changeMeterError = changeMeterEndDataWithEquation("meterFile"+meter_id ,startDate,endDate,meterEndToReplace,equationToReplaceWith)
+
+    return HttpResponse("Success")
 
 ############################## Necessary Files #################################################################
 
@@ -861,5 +937,14 @@ def changeNecessaryFile(request,necessaryFileId_id):
     print(request.POST['subTitle'])
     print(request.POST['description'])
     print(request.FILES['necessaryFile'])
+    necessaryFile = NecessaryFile.objects.get(id=int(necessaryFileId_id))
+    necessaryFile.subTitle = request.POST['subTitle']
+    necessaryFile.description = request.POST['description']
+    necessaryFile.necessaryFile = request.FILES['necessaryFile']
+    necessaryFile.save()
+    return HttpResponse({'message': 'Necessary File updated '}, status=200)
+
+
+
 
     
