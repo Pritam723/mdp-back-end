@@ -11,6 +11,9 @@ statusCodes =  ['Uploaded' , 'Extracted' , 'Merged' , 'DateFiltered','Verified',
 
 #############################################################################################################################################
 
+def sortDateStrings(stringDateList) :
+    stringDateList.sort(key=lambda date: datetime.strptime(date, "%d-%m-%y"))
+    return stringDateList
 
 ###################################################  Global Functions #######################################################################
 

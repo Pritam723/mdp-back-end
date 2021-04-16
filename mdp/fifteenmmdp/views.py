@@ -29,8 +29,8 @@ from .realMeterMWH import createRealMeterMWH
 from .fictMeterMWH import createFictMeterMWH
 from .finalOutput import createFinalOutput
 from .analyseData import fetchData
-from .changeMeterDataAnalyse import changeMeterEndDataWithEquation
-
+from .changeMeterDataAnalyse import changeMeterEndDataWithEquation,revertMeterEndChanges,zeroFillMeter
+from .componentWiseAnalysis import componentWiseMeterAnalysis
 # from .extract import extractMeterFile
 from .supportingFunctions import *
 from django.core.files.storage import FileSystemStorage
@@ -66,7 +66,8 @@ def apiOverview(request):
 @csrf_exempt
 def getAllMeterData(request):
     # AllMeterFiles_json = AllMeterFiles.objects.all()
-    AllMeterFiles_json = serializers.serialize("json", AllMeterFiles.objects.all())
+    AllMeterFiles_json = serializers.serialize("json", AllMeterFiles.objects.all().order_by('-id'))
+    
     # data = {"data": AllMeterFiles_json}
     # return JsonResponse(data)
     return HttpResponse(AllMeterFiles_json, content_type="text/json-comment-filtered")
@@ -893,6 +894,21 @@ def fetchDateInfo(request,meter_id):
     return HttpResponse(json.dumps(dateInformation), content_type="text/json-comment-filtered")
 
 @csrf_exempt
+def zeroFillMeterEndData(request,meter_id):
+    print("inside zeroFillMeterEndData")
+
+    meterEndToZeroFill = request.POST['meterEndToReplace']
+    print(meterEndToZeroFill)
+    print(meter_id)
+
+    meterFile = AllMeterFiles.objects.get(id=int(meter_id))
+
+    zeroFillMeterError = zeroFillMeter("meterFile"+meter_id ,meterFile ,meterEndToZeroFill)
+    return HttpResponse("Success")
+
+
+
+@csrf_exempt
 def changeMeterEndData(request,meter_id):
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
@@ -901,6 +917,27 @@ def changeMeterEndData(request,meter_id):
     changeMeterError = changeMeterEndDataWithEquation("meterFile"+meter_id ,startDate,endDate,meterEndToReplace,equationToReplaceWith)
 
     return HttpResponse("Success")
+
+
+@csrf_exempt
+def revertMeterEndData(request,meter_id):
+    meterEndToReplace = request.POST['meterEndToReplace']
+    print(meterEndToReplace)
+    print(meter_id)
+    print("inside revertMeterEndData")
+    revertMeterEndChangesError = revertMeterEndChanges("meterFile"+meter_id ,meterEndToReplace)
+
+    return HttpResponse("Success")
+
+@csrf_exempt
+def componentWiseAnalysis(request,meter_id):
+    meterEndToAnalyse = request.POST['meterEndToAnalyse']
+    print(meterEndToAnalyse)
+    print(meter_id)
+    print("inside componentWiseAnalysis")
+    componentWiseGraphData = componentWiseMeterAnalysis("meterFile"+meter_id ,meterEndToAnalyse)
+
+    return HttpResponse(json.dumps(componentWiseGraphData), content_type='application/json')
 
 ############################## Necessary Files #################################################################
 

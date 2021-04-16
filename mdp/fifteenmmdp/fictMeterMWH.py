@@ -108,9 +108,10 @@ def createFictMeterMWH(path,_meterData) :
     relativeFilePath = meterFileMainFolder+'/Fictitious Meter MWH Files/'
     relativeReadPath = meterFileMainFolder+'/Real Meter MWH Files/'
     mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
 
-    # if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
-    #     os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files(Copy)')
+    if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
+        os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files(Copy)')
     if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files'):
         os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files')
 

@@ -5,6 +5,122 @@ from .supportingFunctions import *
 from django.conf import settings
 from datetime import time,timedelta,datetime
 import pandas as pd
+from shutil import copyfile
+from pathlib import Path
+from .models import *
+import json
+
+def spaceAdjustmentRealMeterRow(_part) :  # Adjusts one row of real meter
+    spaceAdjustedPart = []
+    for i in range(len(_part)) :
+        if(i == 0) :
+            spaceAdjustedPart.append(_part[i])
+        elif(i == 1) :
+            spaceAdjustedPart.append(" "*decideSpace(16,_part[i]) + _part[i])
+        else :
+            spaceAdjustedPart.append(" "*decideSpace(18,_part[i]) + _part[i])
+    return spaceAdjustedPart
+
+def spaceAdjustFictMeterHeader(_seriesHeader) :
+    #     print("_seriesHeader")
+
+    #     print(_seriesHeader)
+    
+    #     _seriesHeader[1] = " "+ _seriesHeader[1] + " "*(12-len(_seriesHeader[1]))
+    # Issue is if metername is > 12 chars then there will be overlap. Also in case of = 12, metername and date can't be split()
+    # So add a check
+    # if(len(_seriesHeader[1]) >= 12) :
+    #     _seriesHeader[1] = " " + _seriesHeader[1] + " "
+    # else :
+    #     _seriesHeader[1] = " " + _seriesHeader[1] + " "*(12-len(_seriesHeader[1]))
+        
+    _seriesHeader[1] = " " + _seriesHeader[1] + " " * decideSpace(12,_seriesHeader[1])
+
+    _seriesHeader[3] = f'{float(_seriesHeader[3]) :.4f}'
+    # _seriesHeader[3] = " "*(14-len(_seriesHeader[3])) + _seriesHeader[3]
+    _seriesHeader[3] = " "*decideSpace(14,_seriesHeader[3]) + _seriesHeader[3]
+   
+    _seriesHeader[4] = f'{float(_seriesHeader[4]) :.1f}'
+    # _seriesHeader[4] = " "*(11-len(_seriesHeader[4])) + _seriesHeader[4]
+    _seriesHeader[4] = " "*decideSpace(11,_seriesHeader[4]) + _seriesHeader[4]
+
+    _seriesHeader[5] = f'{float(_seriesHeader[5]) :.1f}'
+    # _seriesHeader[5] = " "*(9-len(_seriesHeader[5])) + _seriesHeader[5]
+    _seriesHeader[5] = " "*decideSpace(9,_seriesHeader[5]) + _seriesHeader[5]
+
+    #     print("returning")
+    #     print(_seriesHeader)
+
+    return "".join(_seriesHeader)
+
+def spaceAdjustFictMeterBody(_seriesBody) :
+    _seriesBody[1] = f'{float(_seriesBody[1]) :.6f}'
+    # _seriesBody[1] = " "*(16-len(_seriesBody[1])) + _seriesBody[1]
+    _seriesBody[1] = " "*decideSpace(16,_seriesBody[1]) + _seriesBody[1]
+    
+    _seriesBody[2] = f'{float(_seriesBody[2]) :.6f}'
+    # _seriesBody[2] = " "*(18-len(_seriesBody[2])) + _seriesBody[2]
+    _seriesBody[2] = " "*decideSpace(18,_seriesBody[2]) + _seriesBody[2]
+    
+    _seriesBody[3] = f'{float(_seriesBody[3]) :.6f}'
+    # _seriesBody[3] = " "*(18-len(_seriesBody[3])) + _seriesBody[3]
+    _seriesBody[3] = " "*decideSpace(18,_seriesBody[3]) + _seriesBody[3]
+    
+    _seriesBody[4] = f'{float(_seriesBody[4]) :.6f}'
+    # _seriesBody[4] = " "*(18-len(_seriesBody[4])) + _seriesBody[4]
+    _seriesBody[4] = " "*decideSpace(18,_seriesBody[4]) + _seriesBody[4]
+
+    #     print("returning")
+
+    #     print(_seriesBody)
+    return "".join(_seriesBody)
+
+def spaceAdjustmentFictMeter(_df) :
+    _df[0] = spaceAdjustFictMeterHeader(_df[0].split())
+    i = 1
+    while i < 25 :
+        _df[i] = spaceAdjustFictMeterBody(_df[i].split())
+        i+=1
+    return _df
+
+def dirJsonRealMeterMWH(nPath,_meterData,mwhDict):
+    d = {'name': os.path.basename(nPath)}
+    # d['size'] = str("{0:.2f}".format((os.stat(nPath).st_size / 1024)) + "KB")
+    if os.path.isdir(nPath):
+        d['type'] = "folder"
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+        d['files'] = [dirJsonRealMeterMWH(os.path.join(nPath, x),_meterData,mwhDict) for x in os.listdir(nPath)]
+    else:
+        print(os.path.basename(nPath))
+        d['id'] = mwhDict['lastIndex']
+        mwhDict[mwhDict['lastIndex']] = os.path.relpath(nPath, 'fifteenmmdp/media')
+        mwhDict['lastIndex'] = mwhDict['lastIndex'] + 1
+        
+        d['type'] = "file"
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+
+    return d
+
+def dirJsonFictMeterMWH(nPath,_meterData,fictMwhDict):
+    d = {'name': os.path.basename(nPath)}
+    # d['size'] = str("{0:.2f}".format((os.stat(nPath).st_size / 1024)) + "KB")
+    if os.path.isdir(nPath):
+        d['type'] = "folder"
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+        d['files'] = [dirJsonFictMeterMWH(os.path.join(nPath, x),_meterData,fictMwhDict) for x in os.listdir(nPath)]
+    else:
+        # if(os.path.splitext(nPath)[1].lower() != '.log') :
+
+        print(os.path.basename(nPath))
+        d['id'] = fictMwhDict['lastIndex']
+        fictMwhDict[fictMwhDict['lastIndex']] = os.path.relpath(nPath, 'fifteenmmdp/media')
+        fictMwhDict['lastIndex'] = fictMwhDict['lastIndex'] + 1
+        
+        d['type'] = "file"
+        d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
+      
+
+    return d
 
 def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equationToReplaceWith) :
 
@@ -17,6 +133,8 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
     meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile",path)
     fictMeterMWHPath = meterFileMainFolder+'/Fictitious Meter MWH Files/'
     realMeterMWHPath = meterFileMainFolder+'/Real Meter MWH Files/'
+    fictMeterMWHPathCopy = meterFileMainFolder+'/Fictitious Meter MWH Files(Copy)/'
+    realMeterMWHPathCopy = meterFileMainFolder+'/Real Meter MWH Files(Copy)/'
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
@@ -358,16 +476,7 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
         _mwhHeaderData = [_meterId," "+_meterName," "*3 + _headerDate," "*decideSpace(14,actDiff) + actDiff," "*decideSpace(11,reactiveHighDiff) + reactiveHighDiff," "*decideSpace(9,reactiveLowDiff) + reactiveLowDiff]
         return(_mwhHeaderData)
 
-    def spaceAdjustmentRealMeterRow(_part) :  # Adjusts one row of real meter
-        spaceAdjustedPart = []
-        for i in range(len(_part)) :
-            if(i == 0) :
-                spaceAdjustedPart.append(_part[i])
-            elif(i == 1) :
-                spaceAdjustedPart.append(" "*decideSpace(16,_part[i]) + _part[i])
-            else :
-                spaceAdjustedPart.append(" "*decideSpace(18,_part[i]) + _part[i])
-        return spaceAdjustedPart
+
 
     ######################################## Space adjustments Fict mater ############################################################################
 
@@ -425,8 +534,15 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
         try :
             if(getMeterInfoById(meterLocId) is not None) :
                 data1 = pd.read_csv(realMeterMWHPath + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH', header = None)
+                if not os.path.exists(realMeterMWHPathCopy + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH') :
+                    Path(realMeterMWHPathCopy + dateObject.strftime("%d-%m-%y")).mkdir(parents=True, exist_ok=True)
+                    copyfile(realMeterMWHPath + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH',realMeterMWHPathCopy + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH')
             else :
                 data1 = pd.read_csv(fictMeterMWHPath + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH', header = None)
+                if not os.path.exists(fictMeterMWHPathCopy + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH') :
+                    Path(fictMeterMWHPathCopy + dateObject.strftime("%d-%m-%y")).mkdir(parents=True, exist_ok=True)
+                    copyfile(fictMeterMWHPath + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH',fictMeterMWHPathCopy + dateObject.strftime("%d-%m-%y") + "/" + searchMeterNumber(meterLocId) + '.MWH')
+
 
             dfSeries1 = pd.DataFrame(data1)
             df1 = dfSeries1[0]
@@ -549,3 +665,262 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
                 print("Date in between")
                 singleDayReplacement(dateObj.date(),meterEndToReplace,equationToReplaceWith,'00:00','23:45')
 
+
+def revertMeterEndChanges(path,meterEndToReplace) :
+
+    meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile",path)
+    fictMeterMWHPath = meterFileMainFolder+'/Fictitious Meter MWH Files/'
+    realMeterMWHPath = meterFileMainFolder+'/Real Meter MWH Files/'
+    fictMeterMWHPathCopy = meterFileMainFolder+'/Fictitious Meter MWH Files(Copy)/'
+    realMeterMWHPathCopy = meterFileMainFolder+'/Real Meter MWH Files(Copy)/'
+    ################################################### All RealMeters here. List of fict meters : #############################################
+
+    realMeterInfo = []
+    masterData = open(settings.MEDIA_ROOT+'necessaryFiles/master.dat', "r")
+    masterDataList = masterData.readlines()
+    masterData.close()
+    for elem in masterDataList :
+        if(len(elem) > 1 and isMeterIdPattern(elem.split()[0])) :
+            # print(elem.split())
+            realMeterInfo.append({"Loc_Id" : elem.split()[0] , "Meter_No" : elem.split()[1] , "ctr" : elem.split()[2] , "ptr" : elem.split()[3] })
+
+    # print(realMeterInfo)
+
+    def getMeterInfoById(Loc_Id) :
+
+        meterDetails =  [meter for meter in realMeterInfo if meter['Loc_Id'] == Loc_Id]  
+
+        if(len(meterDetails) < 1) :
+            print(Loc_Id + " not found in master.dat")
+            return None
+        else :
+            return(meterDetails[0])
+
+
+
+    def getMeterInfoByNo(Meter_No) :
+
+        meterDetails =  [meter for meter in realMeterInfo if meter['Meter_No'] == Meter_No]
+
+        if(len(meterDetails) < 1) :
+            return None
+        else :
+            return(meterDetails[0])
+
+
+    ################################################### All FictMeters here. List of fict meters : #############################################
+
+    # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
+    fictMeterInfo = []
+    fictInfoData = open(settings.MEDIA_ROOT+'necessaryFiles/FICTMTRS.dat', "r")
+
+    fictInfoDataList = fictInfoData.readlines()
+    fictInfoData.close()
+    for elem in fictInfoDataList :
+        if(len(elem) > 1 and isMeterIdPattern(elem.split()[0])) :
+            # print(elem.split())
+            fictMeterInfo.append({"Loc_Id" : elem.split()[0] , "Fict_Meter_No" : elem.split()[1] })
+
+
+    def getFictMeterInfoById(Loc_Id) :
+
+        fictMeterDetails =  [meter for meter in fictMeterInfo if meter['Loc_Id'] == Loc_Id]
+
+        if(len(fictMeterDetails) < 1) :
+            print(Loc_Id + " not found in FICTMTRS.dat")
+            return None
+        else :
+            return(fictMeterDetails[0])
+
+    ################################################### Search any meter here. #################################################################
+
+    def searchMeterNumber(Loc_Id) : # Any meter real or fictitious. Returns meter number.
+        meterDetails =  [meter for meter in realMeterInfo if meter['Loc_Id'] == Loc_Id]
+        fictMeterDetails =  [meter for meter in fictMeterInfo if meter['Loc_Id'] == Loc_Id]
+        if(len(meterDetails) != 0) : return meterDetails[0]['Meter_No']
+        if(len(fictMeterDetails) != 0) : return fictMeterDetails[0]['Fict_Meter_No']
+        return "FileNotFound"
+
+    def searchMeterId(Meter_No) : # Any meter real or fictitious. Returns meter Loc_Id.
+        meterDetails =  [meter for meter in realMeterInfo if meter['Meter_No'] == Meter_No]
+        fictMeterDetails =  [meter for meter in fictMeterInfo if meter['Fict_Meter_No'] == Meter_No]
+        if(len(meterDetails) != 0) : return meterDetails[0]['Loc_Id']
+        if(len(fictMeterDetails) != 0) : return fictMeterDetails[0]['Loc_Id']
+        # return None
+        return "Loc_Id not found"
+
+    ################################################ Revert Function ###########################################################################
+
+
+    mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
+
+    for mwhDate in mwhDates :
+        if(getMeterInfoById(meterEndToReplace) is not None) :  # So it is a real meter
+            if os.path.exists(realMeterMWHPathCopy + mwhDate + "/" + searchMeterNumber(meterEndToReplace) + '.MWH') :
+                copyfile(realMeterMWHPathCopy + mwhDate + "/" + searchMeterNumber(meterEndToReplace) + '.MWH',realMeterMWHPath + mwhDate + "/" + searchMeterNumber(meterEndToReplace) + '.MWH')
+        else : # Fict Meter
+            if os.path.exists(fictMeterMWHPathCopy + mwhDate + "/" + searchMeterNumber(meterEndToReplace) + '.MWH') :
+                copyfile(fictMeterMWHPathCopy + mwhDate + "/" + searchMeterNumber(meterEndToReplace) + '.MWH',fictMeterMWHPath + mwhDate + "/" + searchMeterNumber(meterEndToReplace) + '.MWH')
+
+    return {'errorCode' : 0 , 'msg' : "Success"}
+
+
+def zeroFillMeter(path,_meterData,meterEndToZeroFill) :
+    print("inside zeroFillMeter")
+    meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile",path)
+    fictMeterMWHPath = meterFileMainFolder+'/Fictitious Meter MWH Files/'
+    realMeterMWHPath = meterFileMainFolder+'/Real Meter MWH Files/'
+    fictMeterMWHPathCopy = meterFileMainFolder+'/Fictitious Meter MWH Files(Copy)/'
+    realMeterMWHPathCopy = meterFileMainFolder+'/Real Meter MWH Files(Copy)/'
+
+
+        ################################################### All RealMeters here. List of fict meters : #############################################
+
+    realMeterInfo = []
+    masterData = open(settings.MEDIA_ROOT+'necessaryFiles/master.dat', "r")
+    masterDataList = masterData.readlines()
+    masterData.close()
+    for elem in masterDataList :
+        if(len(elem) > 1 and isMeterIdPattern(elem.split()[0])) :
+            # print(elem.split())
+            realMeterInfo.append({"Loc_Id" : elem.split()[0] , "Meter_No" : elem.split()[1] , "ctr" : elem.split()[2] , "ptr" : elem.split()[3] })
+
+    # print(realMeterInfo)
+
+    def getMeterInfoById(Loc_Id) :
+
+        meterDetails =  [meter for meter in realMeterInfo if meter['Loc_Id'] == Loc_Id]  
+
+        if(len(meterDetails) < 1) :
+            print(Loc_Id + " not found in master.dat")
+            return None
+        else :
+            return(meterDetails[0])
+
+
+
+    def getMeterInfoByNo(Meter_No) :
+
+        meterDetails =  [meter for meter in realMeterInfo if meter['Meter_No'] == Meter_No]
+
+        if(len(meterDetails) < 1) :
+            return None
+        else :
+            return(meterDetails[0])
+
+
+    ################################################### All FictMeters here. List of fict meters : #############################################
+
+    # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
+    fictMeterInfo = []
+    fictInfoData = open(settings.MEDIA_ROOT+'necessaryFiles/FICTMTRS.dat', "r")
+
+    fictInfoDataList = fictInfoData.readlines()
+    fictInfoData.close()
+    for elem in fictInfoDataList :
+        if(len(elem) > 1 and isMeterIdPattern(elem.split()[0])) :
+            # print(elem.split())
+            fictMeterInfo.append({"Loc_Id" : elem.split()[0] , "Fict_Meter_No" : elem.split()[1] })
+
+
+    def getFictMeterInfoById(Loc_Id) :
+
+        fictMeterDetails =  [meter for meter in fictMeterInfo if meter['Loc_Id'] == Loc_Id]
+
+        if(len(fictMeterDetails) < 1) :
+            print(Loc_Id + " not found in FICTMTRS.dat")
+            return None
+        else :
+            return(fictMeterDetails[0])
+
+    ################################################### Search any meter here. #################################################################
+
+    def searchMeterNumber(Loc_Id) : # Any meter real or fictitious. Returns meter number.
+        meterDetails =  [meter for meter in realMeterInfo if meter['Loc_Id'] == Loc_Id]
+        fictMeterDetails =  [meter for meter in fictMeterInfo if meter['Loc_Id'] == Loc_Id]
+        if(len(meterDetails) != 0) : return meterDetails[0]['Meter_No']
+        if(len(fictMeterDetails) != 0) : return fictMeterDetails[0]['Fict_Meter_No']
+        return "FileNotFound"
+
+    def searchMeterId(Meter_No) : # Any meter real or fictitious. Returns meter Loc_Id.
+        meterDetails =  [meter for meter in realMeterInfo if meter['Meter_No'] == Meter_No]
+        fictMeterDetails =  [meter for meter in fictMeterInfo if meter['Fict_Meter_No'] == Meter_No]
+        if(len(meterDetails) != 0) : return meterDetails[0]['Loc_Id']
+        if(len(fictMeterDetails) != 0) : return fictMeterDetails[0]['Loc_Id']
+        # return None
+        return "Loc_Id not found"
+
+    ################################################ Evaluate Function ###########################################################################
+    def scalarToSeries(floatValue,customHeader = ["No header"]) : # Replace header with desired value.
+        scalarDf = pd.Series([],dtype=object)
+        scalarDf = scalarDf.append(pd.Series(''.join(customHeader)), ignore_index=True)
+        for timeStamp in range(24) :
+            rowPart = [str((timeStamp)*100).zfill(4)] + [f'{(float(x)) :.6f}' for x in [str(floatValue)]*4]
+            scalarDf = scalarDf.append(pd.Series(' '.join((rowPart))), ignore_index=True)
+            scalarDf = scalarDf.reset_index(drop=True)
+        return scalarDf
+
+    ###############################################################################################################################################
+
+    # Stating with the new 0 filling part
+    print("Stating with the new 0 filling part")
+
+    mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
+
+    # for realMeter in realMeterInfo : meterEndToZeroFill
+    if(getMeterInfoById(meterEndToZeroFill) is not None) :
+        realMeter = getMeterInfoById(meterEndToZeroFill)
+        changeFlag = False
+        for mwhDate in mwhDates :
+            if not os.path.exists(meterFileMainFolder+'/Real Meter MWH Files/' + mwhDate + "/" + realMeter["Meter_No"] + ".MWH"):
+                changeFlag = True
+                scalarDf = scalarToSeries(0.0,[realMeter["Loc_Id"] + " " + realMeter["Meter_No"] + " "*3 + mwhDate + " "*8 + "0.0000" +  " "*8 + "0.0" + " "*6 + "0.0" ])
+                i = 1
+                while i < 25 :
+                    scalarDf[i] = ''.join(spaceAdjustmentRealMeterRow(scalarDf[i].split()))
+                    i = i + 1
+                scalarDf.to_csv(meterFileMainFolder+'/Real Meter MWH Files/' + mwhDate + "/" + realMeter["Meter_No"] + ".MWH", header=False, index=None)
+
+        if(changeFlag) :
+
+            mwhDict = {'lastIndex' : 1}
+
+            jsonOutput = dirJsonRealMeterMWH(os.path.splitext(realMeterMWHPath)[0],_meterData,mwhDict)
+
+            realMeterMWHFileObject = RealMeterMWHFile.objects.get(meterFile=_meterData)
+
+            realMeterMWHFileObject.mwhDictionary = json.dumps(mwhDict)
+            realMeterMWHFileObject.dirStructureRealMWH = json.dumps(jsonOutput)
+
+            realMeterMWHFileObject.save()
+
+    elif(getFictMeterInfoById(meterEndToZeroFill) is not None) :
+        fictMeter = getFictMeterInfoById(meterEndToZeroFill)
+        changeFlag = False
+        for mwhDate in mwhDates :
+            if not os.path.exists(meterFileMainFolder+'/Fictitious Meter MWH Files/' + mwhDate + "/" + fictMeter["Fict_Meter_No"] + ".MWH"):
+                changeFlag = True
+                scalarDf = scalarToSeries(0.0,[fictMeter["Loc_Id"] + " " + fictMeter["Fict_Meter_No"] + " "*3 + mwhDate + " "*8 + "0.0000" +  " "*8 + "0.0" + " "*6 + "0.0" ])
+                scalarDf = spaceAdjustmentFictMeter(scalarDf)
+                scalarDf.to_csv(meterFileMainFolder+'/Fictitious Meter MWH Files/' + mwhDate + "/" + fictMeter["Fict_Meter_No"] + ".MWH", header=False, index=None)
+        
+        if(changeFlag) :
+
+            mwhDict = {'lastIndex' : 1}
+
+            jsonOutput = dirJsonFictMeterMWH(os.path.splitext(fictMeterMWHPath)[0],_meterData,mwhDict)
+
+            fictMeterMWHFileObject = FictMeterMWHFile.objects.get(meterFile=_meterData)
+
+            fictMeterMWHFileObject.fictMwhDictionary = json.dumps(mwhDict)
+            fictMeterMWHFileObject.dirStructureFictMWH = json.dumps(jsonOutput)
+
+            fictMeterMWHFileObject.save()
+    else :
+        pass
+
+    print("Ending with the new 0 filling part")
+
+   # Ending with the new 0 filling part

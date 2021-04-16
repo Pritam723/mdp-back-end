@@ -143,6 +143,7 @@ def createFinalOutput(path,_meterData):
     realMeterMWHPath = meterFileMainFolder+'/Real Meter MWH Files/'
     relativeFilePath = meterFileMainFolder+'/Final Output Files/'
     mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
 
     # if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
     #     os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files(Copy)')

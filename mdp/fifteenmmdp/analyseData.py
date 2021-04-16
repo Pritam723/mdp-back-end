@@ -36,6 +36,7 @@ def fetchData(meter_id,_end1,_end2,polarity) :
     # End2 = 'BI-02'
     meterFileMainFolder = os.path.join("fifteenmmdp/media/meterFile/meterFile"+meter_id)
     mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
     print(mwhDates)
 
 
