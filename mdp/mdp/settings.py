@@ -129,7 +129,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS=[os.path.join(BASE_DIR,"static")]
+STATICFILES_DIRS=[os.path.join(BASE_DIR,"static"),]
 MEDIA_URL="media/"  # So in our app case fifteenmmdp/media will land to Media Root
 MEDIA_ROOT=os.path.join(BASE_DIR,'fifteenmmdp/media/')
 # LOGIN_URL = '/login'

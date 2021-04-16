@@ -52,16 +52,7 @@ def index(request):
 
 @api_view(['GET'])
 def apiOverview(request):
-	api_urls = {
-		'List':'/task-list/',
-		'Detail View':'/task-detail/<str:pk>/',
-		'Create':'/task-create/',
-		'Update':'/task-update/<str:pk>/',
-		'Delete':'/task-delete/<str:pk>/',
-		}
-
-	return Response(api_urls)
-
+    return render(request,"index.html")
 ####################### Zipped Meter Data ####################################################################
 @csrf_exempt
 def getAllMeterData(request):
