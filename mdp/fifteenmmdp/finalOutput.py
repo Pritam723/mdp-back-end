@@ -143,6 +143,7 @@ def createFinalOutput(path,_meterData):
     realMeterMWHPath = meterFileMainFolder+'/Real Meter MWH Files/'
     relativeFilePath = meterFileMainFolder+'/Final Output Files/'
     mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
 
     # if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
     #     os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files(Copy)')
@@ -466,7 +467,7 @@ def createFinalOutput(path,_meterData):
 
     ################################################### Performing main operation #######################################
     
-    with open(settings.MEDIA_ROOT+'/necessaryFiles/newCFGUpdated.xlsx', "rb") as f: # input the .xlsx
+    with open(settings.MEDIA_ROOT+'/necessaryFiles/ConfigurationFile.xlsx', "rb") as f: # input the .xlsx
         data = pd.read_excel(f,sheet_name="Configuration",engine='openpyxl',header = None)
         f.close()
         
@@ -594,6 +595,7 @@ def createFinalOutput(path,_meterData):
                         df = evaluate("XY-99",mwhDate,equation)
                         # print(df)
                         # Check if df is a series or float now. Act accordingly.
+                        # If df is float, it implies that fictMeterId,mwhDate etc info never used. Only ffOperation() is called.
 
                         fullDayData = []
                         hour = 1

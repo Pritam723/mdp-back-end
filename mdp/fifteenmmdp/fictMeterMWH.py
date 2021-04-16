@@ -64,7 +64,7 @@ def spaceAdjustFictMeterBody(_seriesBody) :
     #     print(_seriesBody)
     return "".join(_seriesBody)
 
-def spaceAdjustment(_df) :
+def spaceAdjustmentFictMeter(_df) :
     _df[0] = spaceAdjustFictMeterHeader(_df[0].split())
     i = 1
     while i < 25 :
@@ -108,9 +108,10 @@ def createFictMeterMWH(path,_meterData) :
     relativeFilePath = meterFileMainFolder+'/Fictitious Meter MWH Files/'
     relativeReadPath = meterFileMainFolder+'/Real Meter MWH Files/'
     mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    mwhDates = sortDateStrings(mwhDates)
 
-    # if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
-    #     os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files(Copy)')
+    if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files(Copy)'): 
+        os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files(Copy)')
     if not os.path.exists(meterFileMainFolder +'/Fictitious Meter MWH Files'):
         os.makedirs(meterFileMainFolder + '/Fictitious Meter MWH Files')
 
@@ -497,9 +498,10 @@ def createFictMeterMWH(path,_meterData) :
 
                     for mwhDate in mwhDates :
                         df = evaluate(fictMeterId,mwhDate,myExp)
-                        df = spaceAdjustment(df)
+                        df = spaceAdjustmentFictMeter(df)
                         # print(df)
-                        # Check if df is a series or float now. Act accordingly.
+                        # Check if df is a series or float now. Act accordingly. 
+                        # If df is float, it implies that fictMeterId,mwhDate etc info never used. Only ffOperation() is called.
                      
                         if not os.path.exists(relativeFilePath+mwhDate+"/"):
                             os.makedirs(relativeFilePath+mwhDate+"/")
@@ -550,8 +552,9 @@ def createFictMeterMWH(path,_meterData) :
 
                     for mwhDate in mwhDates :
                         df = evaluate(fictMeterId,mwhDate,myExp)
-                        df = spaceAdjustment(df)
+                        df = spaceAdjustmentFictMeter(df)
                         # Check if df is a series or float now. Act accordingly.
+                        # If df is float, it implies that fictMeterId,mwhDate etc info never used. Only ffOperation() is called.
 
                   
                         if not os.path.exists(relativeFilePath+mwhDate+"/"):

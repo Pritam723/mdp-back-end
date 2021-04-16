@@ -7,13 +7,13 @@ import os
 
 class OverwriteStorage(FileSystemStorage):
     def get_valid_name(self, name):
-        print("inside Overwss")
+        print("inside OverwriteStorage")
         print(name)
         # return get_valid_filename(name)
         return name
     def get_available_name(self, name,max_length=None):
         if self.exists(name):
-            print("inside Overwss")
+            print("inside OverwriteStorage")
             print(name)
             os.remove(os.path.join(settings.MEDIA_ROOT, name))
         return name

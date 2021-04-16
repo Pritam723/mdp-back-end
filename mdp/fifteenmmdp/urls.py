@@ -17,7 +17,8 @@ from django.views.static import serve
 
 urlpatterns = [
 	path('', views.apiOverview, name="api-overview"),
-    # path('test/', views.test, name="test"),
+
+
     # path('addMasterData/', views.addMasterData, name="addMasterData"),
     # path('fetchMD/', views.fetchMD, name="fetchMD"),
 
@@ -69,6 +70,15 @@ urlpatterns = [
 	path('downloadFinalOutputFile/<str:meter_id>/<str:finalOutput_id>', views.downloadFinalOutputFile, name ="downloadFinalOutputFile"),
 	path('downLoadFullFinalOutputFiles/<str:meter_id>', views.downLoadFullFinalOutputFiles, name ="downLoadFullFinalOutputFiles"),
     
+
+	path('analyseData/<str:meter_id>', views.analyseData, name = "analyseData"),
+	path('fetchGraphData/<str:meter_id>/<str:end1>/<str:end2>/<str:polarity>',views.fetchGraphData,name="fetchGraphData"),
+	path('fetchDateInfo/<str:meter_id>', views.fetchDateInfo, name="fetchDateInfo"),
+	path('zeroFillMeterEndData/<str:meter_id>', views.zeroFillMeterEndData, name="zeroFillMeterEndData"),
+	path('changeMeterEndData/<str:meter_id>', views.changeMeterEndData, name="changeMeterEndData"),
+	path('revertMeterEndData/<str:meter_id>', views.revertMeterEndData, name="revertMeterEndData"),
+	path('componentWiseAnalysis/<str:meter_id>', views.componentWiseAnalysis, name="componentWiseAnalysis"),
+
 	path('getNecessaryFiles', views.getNecessaryFiles, name ="getNecessaryFiles"),
 	path('downLoadNecessaryFile/<str:necessaryFileId_id>', views.downLoadNecessaryFile, name ="downLoadNecessaryFile"),
 	path('changeNecessaryFile/<str:necessaryFileId_id>', views.changeNecessaryFile, name ="changeNecessaryFile"),

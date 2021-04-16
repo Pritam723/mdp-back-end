@@ -21,7 +21,7 @@ def generateMwhHeader(_meterHeaderData,_nextMeterHeaderData,_meterId,_meterName,
     return(_mwhHeaderData)
 
 
-def spaceAdjustment(_part) :
+def spaceAdjustmentRealMeterRow(_part) :
     spaceAdjustedPart = []
     for i in range(len(_part)) :
         if(i == 0) :
@@ -188,10 +188,10 @@ def createRealMeterMWH(path,_meterData) :
                 
                 # print(part1)
                 
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part1))), ignore_index=True)
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part2))), ignore_index=True)
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part3))), ignore_index=True)
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part4))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part1))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part2))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part3))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part4))), ignore_index=True)
 
                 timeStamp = timeStamp + 4
             

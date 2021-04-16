@@ -7,6 +7,15 @@ import pandas as pd
 import json
 from datetime import datetime
 
+def scalarToSeries(floatValue,customHeader = ["No header"]) : # Replace header with desired value.
+    scalarDf = pd.Series([],dtype=object)
+    scalarDf = scalarDf.append(pd.Series(''.join(customHeader)), ignore_index=True)
+    for timeStamp in range(24) :
+        rowPart = [str((timeStamp)*100).zfill(4)] + [f'{(float(x)) :.6f}' for x in [str(floatValue)]*4]
+        scalarDf = scalarDf.append(pd.Series(' '.join((rowPart))), ignore_index=True)
+        scalarDf = scalarDf.reset_index(drop=True)
+    return scalarDf
+
 def generateMwhHeader(_meterHeaderData,_nextMeterHeaderData,_meterId,_meterName,_ctr,_ptr,_headerDate) :
     # We have [NP-5851-A,    97845.9,    35371.6,    00136.0,    07-12-20] and for 08-12-20
 
@@ -20,7 +29,7 @@ def generateMwhHeader(_meterHeaderData,_nextMeterHeaderData,_meterId,_meterName,
     _mwhHeaderData = [_meterId," "+_meterName," "*3 + _headerDate," "*decideSpace(14,actDiff) + actDiff," "*decideSpace(11,reactiveHighDiff) + reactiveHighDiff," "*decideSpace(9,reactiveLowDiff) + reactiveLowDiff]
     return(_mwhHeaderData)
 
-def spaceAdjustment(_part) :
+def spaceAdjustmentRealMeterRow(_part) :
     spaceAdjustedPart = []
     for i in range(len(_part)) :
         if(i == 0) :
@@ -189,10 +198,10 @@ def createRealMeterMWH(path,_meterData) :
                 
                 # print(part1)
                 
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part1))), ignore_index=True)
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part2))), ignore_index=True)
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part3))), ignore_index=True)
-                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustment(part4))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part1))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part2))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part3))), ignore_index=True)
+                mwhFile = mwhFile.append(pd.Series(''.join(spaceAdjustmentRealMeterRow(part4))), ignore_index=True)
 
                 timeStamp = timeStamp + 4
             
@@ -226,6 +235,27 @@ def createRealMeterMWH(path,_meterData) :
 
     for elem in ((list(set(realMeterNotInDB)))) :
         print(elem)
+
+    #########################################################################################################################################
+
+   # Stating with the new 0 filling part
+    # print("Stating with the new 0 filling part")
+
+    # mwhDates = list(filter(isDate, os.listdir(meterFileMainFolder+'/Real Meter MWH Files')))
+    # mwhDates = sortDateStrings(mwhDates)
+
+    # for realMeter in realMeterInfo :
+    #     for mwhDate in mwhDates :
+    #         if not os.path.exists(meterFileMainFolder+'/Real Meter MWH Files/' + mwhDate + "/" + realMeter["Meter_No"] + ".MWH"):
+    #             scalarDf = scalarToSeries(0.0,[realMeter["Loc_Id"] + " " + realMeter["Meter_No"] + " "*3 + mwhDate + " "*8 + "0.0000" +  " "*8 + "0.0" + " "*6 + "0.0" ])
+    #             i = 1
+    #             while i < 25 :
+    #                 scalarDf[i] = ''.join(spaceAdjustmentRealMeterRow(scalarDf[i].split()))
+    #                 i = i + 1
+    #             scalarDf.to_csv(meterFileMainFolder+'/Real Meter MWH Files/' + mwhDate + "/" + realMeter["Meter_No"] + ".MWH", header=False, index=None)
+    # print("Ending with the new 0 filling part")
+
+   # Ending with the new 0 filling part
 
     # print((len(realMeterNotInDB)))
     # print(len(set(realMeterNotInDB)))

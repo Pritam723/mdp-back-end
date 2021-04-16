@@ -2,7 +2,8 @@ import os
 from django.core.files import File
 import re
 from datetime import datetime,timedelta
-
+# import plotly.graph_objects as go
+# import numpy as np
 
 ###################################################  Global Variables #######################################################################
 checkTimeStamp = ['00','04','08','12','16','20']
@@ -10,6 +11,9 @@ statusCodes =  ['Uploaded' , 'Extracted' , 'Merged' , 'DateFiltered','Verified',
 
 #############################################################################################################################################
 
+def sortDateStrings(stringDateList) :
+    stringDateList.sort(key=lambda date: datetime.strptime(date, "%d-%m-%y"))
+    return stringDateList
 
 ###################################################  Global Functions #######################################################################
 
@@ -42,6 +46,12 @@ def isFloat(value):
         return True
     except ValueError:
         return False
+
+def changeToFloat(x) :
+    if(isFloat(x)) :
+        return float(x)
+    else :
+        return None
 
 def isTwoDigitFloat(value):
     value = initialCharHandler(value)
@@ -125,8 +135,8 @@ def isMeterNameUnique(nameList) :
 
 def isMeterDateConsecutive(dateList,startObj,endObj) :
     
-    if(dateList[0] != startObj or dateList[-1] != endObj) :
-        return False
+    # if(dateList[0] != startObj or dateList[-1] != endObj) :
+    #     return False
 
     for day in range((endObj-startObj).days+1) :
         if(dateList[day] != startObj+timedelta(days=day)) :
