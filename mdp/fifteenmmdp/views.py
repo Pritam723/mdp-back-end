@@ -10,7 +10,6 @@ import pandas as pd
 # Create your views here.
 from django.core.files import File
 
-
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -31,7 +30,8 @@ from .finalOutput import createFinalOutput
 from .analyseData import fetchData
 from .changeMeterDataAnalyse import changeMeterEndDataWithEquation,revertMeterEndChanges,zeroFillMeter
 from .componentWiseAnalysis import componentWiseMeterAnalysis
-# from .extract import extractMeterFile
+from .specialReports import specialReport1
+
 from .supportingFunctions import *
 from django.core.files.storage import FileSystemStorage
 
@@ -52,7 +52,16 @@ def index(request):
 
 @api_view(['GET'])
 def apiOverview(request):
-    return render(request,"index.html")
+	api_urls = {
+		'List':'/task-list/',
+		'Detail View':'/task-detail/<str:pk>/',
+		'Create':'/task-create/',
+		'Update':'/task-update/<str:pk>/',
+		'Delete':'/task-delete/<str:pk>/',
+		}
+
+	return Response(api_urls)
+
 ####################### Zipped Meter Data ####################################################################
 @csrf_exempt
 def getAllMeterData(request):
@@ -132,7 +141,9 @@ def extract(request,meter_id):
         meterData = AllMeterFiles.objects.get(id=meter_id)
         print(meterData.zippedMeterFile)
         # zipFilePath = os.path.join("fifteenmmdp/media/",str(meterData.zippedMeterFile))
-        npcFilesFolderPath = os.path.join("fifteenmmdp/media/meterFile/meterFile"+meter_id,'NPC Files',os.path.basename(str(meterData.zippedMeterFile)))
+        # npcFilesFolderPath = os.path.join("fifteenmmdp/media/meterFile/meterFile"+meter_id,'NPC Files',os.path.basename(str(meterData.zippedMeterFile)))
+        npcFilesFolderPath = os.path.join("fifteenmmdp/media/meterFile/meterFile"+meter_id,'NPC Files')
+
         # print(os.path.splitext(zipFilePath))   # ('fifteenmmdp/media/meterFile/meterFile29/test', '.zip')
         print(npcFilesFolderPath)
         print(os.path.splitext(npcFilesFolderPath)) # ('meterFile/meterFile29\\NPC Files\\test', '.zip')
@@ -142,6 +153,9 @@ def extract(request,meter_id):
             zip_ref.extractall("fifteenmmdp/media/meterFile/meterFile"+ meter_id +"/NPC Files")
 
         if(not (meterData.status is None) and (statusCodes.index(meterData.status) == 0)) :
+
+            shutil.copytree('fifteenmmdp/media/necessaryFiles', "fifteenmmdp/media/meterFile/meterFile"+ meter_id +"/NPC Files/Necessary Files Local Copy")
+
             print("Extract executed")
 
             npcDict = {'lastIndex' : 1}
@@ -929,6 +943,16 @@ def componentWiseAnalysis(request,meter_id):
     componentWiseGraphData = componentWiseMeterAnalysis("meterFile"+meter_id ,meterEndToAnalyse)
 
     return HttpResponse(json.dumps(componentWiseGraphData), content_type='application/json')
+
+############################## Special Reports #################################################################
+
+@csrf_exempt
+def specialReports(request,meter_id):
+    print(meter_id)
+    print("inside specialReports")
+    specialReport1Data = specialReport1("meterFile"+meter_id,meter_id)
+
+    return HttpResponse(json.dumps(specialReport1Data), content_type='application/json')
 
 ############################## Necessary Files #################################################################
 

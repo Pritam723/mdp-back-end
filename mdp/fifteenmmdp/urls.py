@@ -79,6 +79,8 @@ urlpatterns = [
 	path('revertMeterEndData/<str:meter_id>', views.revertMeterEndData, name="revertMeterEndData"),
 	path('componentWiseAnalysis/<str:meter_id>', views.componentWiseAnalysis, name="componentWiseAnalysis"),
 
+	path('specialReports/<str:meter_id>', views.specialReports, name="specialReports"),
+
 	path('getNecessaryFiles', views.getNecessaryFiles, name ="getNecessaryFiles"),
 	path('downLoadNecessaryFile/<str:necessaryFileId_id>', views.downLoadNecessaryFile, name ="downLoadNecessaryFile"),
 	path('changeNecessaryFile/<str:necessaryFileId_id>', views.changeNecessaryFile, name ="changeNecessaryFile"),
