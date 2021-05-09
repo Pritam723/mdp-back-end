@@ -25,12 +25,14 @@ from .merge import mergeNPCs
 from .dateFilter import dateFilterMergedFile
 from .validate import validateFile
 from .realMeterMWH import createRealMeterMWH
+from .frequencyGraphData import frequencyGraphData
 from .fictMeterMWH import createFictMeterMWH
 from .finalOutput import createFinalOutput
 from .analyseData import fetchData
 from .changeMeterDataAnalyse import changeMeterEndDataWithEquation,revertMeterEndChanges,zeroFillMeter
 from .componentWiseAnalysis import componentWiseMeterAnalysis
 from .specialReports import specialReport1
+
 
 from .supportingFunctions import *
 from django.core.files.storage import FileSystemStorage
@@ -151,6 +153,7 @@ def extract(request,meter_id):
         with zipfile.ZipFile('fifteenmmdp/media/'+ str(meterData.zippedMeterFile), 'r') as zip_ref:
             # zip_ref.extractall("fifteenmmdp/media/meterFile/meterFile"+ meter_id)
             zip_ref.extractall("fifteenmmdp/media/meterFile/meterFile"+ meter_id +"/NPC Files")
+
 
         if(not (meterData.status is None) and (statusCodes.index(meterData.status) == 0)) :
 
@@ -532,7 +535,7 @@ def changeRealMeterMWHFile(request,meter_id,realMeterMWH_id):
     # realMeterMWHFileToChange.save()
     return HttpResponse({'message': 'RealMeterMWHFile Changed'}, status=200)
 
-
+@csrf_exempt
 def downLoadFullRealMeterMWHFiles(request,meter_id):
     print("inside downLoadFullRealMeterMWHFiles")
     print(meter_id)
@@ -550,6 +553,14 @@ def downLoadFullRealMeterMWHFiles(request,meter_id):
             return response
 
     return HttpResponse("There is no Real Meter MWH File to download")
+
+@csrf_exempt
+def fetchFrequencyGraphData(request, meter_id) :
+    print("i am in fetchFrequencyGraphData")
+
+    frequencyGraphDataToSend = frequencyGraphData(path = "meterFile"+meter_id) 
+    # print(frequencyGraphDataToSend)
+    return HttpResponse(json.dumps(frequencyGraphDataToSend))
 ############################## Create Fictitious Meter MWH #################################################################
 
 @csrf_exempt
@@ -839,7 +850,7 @@ def analyseData(request,meter_id):
     try :
         print("Analyse data")
 
-        with open("fifteenmmdp/media/necessaryFiles/GraphConfiguration.xlsx", "rb") as f: # input the .xlsx
+        with open("fifteenmmdp/media/meterFile/meterFile" + str(meter_id) +"/NPC Files/Necessary Files Local Copy/GraphConfiguration.xlsx", "rb") as f: # input the .xlsx
             data = pd.read_excel(f,sheet_name=None,engine='openpyxl')
             f.close()
 
@@ -869,11 +880,12 @@ def analyseData(request,meter_id):
         #     feederObject = {'id' : row['SL NO'] , 'Feeder Name' : row['Feeder Name'] , 'End1' : row['End1'], 'End2' : row['End2'] }
         #     stateWiseFeederDetails['WEST BENGAL'].append(feederObject)
 
-        print(stateWiseFeederDetails)
+        # print(stateWiseFeederDetails)
         return HttpResponse(json.dumps(stateWiseFeederDetails), content_type="application/json")
 
         # return HttpResponse({'message': 'ANALYSE DATA'}, status=200)
     except Exception as e :
+        print(str(e))
         return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
 
 @csrf_exempt
@@ -950,7 +962,11 @@ def componentWiseAnalysis(request,meter_id):
 def specialReports(request,meter_id):
     print(meter_id)
     print("inside specialReports")
-    specialReport1Data = specialReport1("meterFile"+meter_id,meter_id)
+    threshold = request.POST['threshold']
+    print(threshold)
+    if(not isFloat(threshold)) :
+        threshold = 0.5
+    specialReport1Data = specialReport1("meterFile"+meter_id,meter_id, float(threshold))
 
     return HttpResponse(json.dumps(specialReport1Data), content_type='application/json')
 

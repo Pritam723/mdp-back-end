@@ -35,7 +35,7 @@ def componentWiseMeterAnalysis(path ,meterEndToAnalyse):
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -71,7 +71,7 @@ def componentWiseMeterAnalysis(path ,meterEndToAnalyse):
 
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
 
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -114,7 +114,7 @@ def componentWiseMeterAnalysis(path ,meterEndToAnalyse):
     # fictMeterDict['(BM-99)'] gives      -(BI-09)*0.97899. trim spaces later. \n trimmed
 
 
-    fctCFG = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.CFG', "r")
+    fctCFG = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.CFG', "r")
     fList = fctCFG.readlines()
     # print(len(fList[len(fList)-2]))
     # print((fList[len(fList)-2])[:3])

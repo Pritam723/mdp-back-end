@@ -154,7 +154,7 @@ def createFinalOutput(path,_meterData):
 
     # [{'Loc_Id': 'FK-01', 'Meter_No': 'ER-1649-A', 'ctr': '500', 'ptr': '3636.3636'} ,{'Loc_Id': 'FK-02', 'Meter_No': 'ER-1646-A', 'ctr': '500', 'ptr': '3636.3636'}]
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -189,7 +189,7 @@ def createFinalOutput(path,_meterData):
     
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
     
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -467,7 +467,7 @@ def createFinalOutput(path,_meterData):
 
     ################################################### Performing main operation #######################################
     
-    with open(settings.MEDIA_ROOT+'/necessaryFiles/ConfigurationFile.xlsx', "rb") as f: # input the .xlsx
+    with open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/ConfigurationFile.xlsx', "rb") as f: # input the .xlsx
         data = pd.read_excel(f,sheet_name="Configuration",engine='openpyxl',header = None)
         f.close()
         

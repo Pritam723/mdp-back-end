@@ -147,7 +147,7 @@ def dateFilterMergedFile(path,_meterData) :
     
     realMeterInfo = []
     allMeterNumbers = []
-    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :

@@ -69,7 +69,7 @@ def timeSeries() :
     _timeSeries.append('23:45')
     return(_timeSeries)
 
-def specialReport1(path,meter_id):
+def specialReport1(path,meter_id,threshold):
     print("inside specialReports")
 
     meterFileMainFolder = os.path.join("fifteenmmdp/media/meterFile/meterFile"+meter_id)
@@ -81,7 +81,7 @@ def specialReport1(path,meter_id):
 ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -117,7 +117,7 @@ def specialReport1(path,meter_id):
     
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
     
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -198,7 +198,7 @@ def specialReport1(path,meter_id):
     greenData = {'key': 'green' , 'xVal' : [] , 'yVal' : [],'genVal' : [] , 'drwVal' : [], 'hoverDataGeneration' : _hoverDataGenerationGreen , 'hoverDataDrawal' : _hoverDataDrawalGreen}
 
     for loopIndex,item in enumerate(successivePercentLossDifferenceList):
-        if((item is not None) and (abs(item) >= 0.5)) :
+        if((item is not None) and (abs(item) >= threshold)) :
             redData['xVal'].append(fullXAxisData[loopIndex+1])
             redData['yVal'].append(item)
             redData['genVal'].append(successivePercentGenerationDifferenceList[loopIndex])
@@ -235,7 +235,7 @@ def specialReport1(path,meter_id):
           'hoverDataGeneration' : greenData['hoverDataGeneration'],
           'hoverDataDrawal' : greenData['hoverDataDrawal'],
           'marker': { 'color' : "green" },
-          'name': "dL/dt < 0.5",
+          'name': "|dL/dt| < " + str(threshold),
         },
         {
           'type': "scatter",
@@ -247,7 +247,7 @@ def specialReport1(path,meter_id):
           'hoverDataGeneration' : redData['hoverDataGeneration'],
           'hoverDataDrawal' : redData['hoverDataDrawal'],
           'marker': { 'color' : "red" },
-          'name': "dL/dt >= 0.5",
+          'name': "|dL/dt| >= " + str(threshold),
         },
       ]
 
