@@ -55,6 +55,8 @@ urlpatterns = [
 	path('changeRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.changeRealMeterMWHFile, name ="changeRealMeterMWHFile"),
 	path('downloadRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.downloadRealMeterMWHFile, name ="downloadRealMeterMWHFile"),
 	path('downLoadFullRealMeterMWHFiles/<str:meter_id>', views.downLoadFullRealMeterMWHFiles, name ="downLoadFullRealMeterMWHFiles"),
+	path('fetchFrequencyGraphData/<str:meter_id>', views.fetchFrequencyGraphData, name ="fetchFrequencyGraphData"),
+
 
 
 	path('getFictMeterMWHData/<str:meter_id>', views.getFictMeterMWHData, name ="getFictMeterMWHData"),
@@ -78,6 +80,8 @@ urlpatterns = [
 	path('changeMeterEndData/<str:meter_id>', views.changeMeterEndData, name="changeMeterEndData"),
 	path('revertMeterEndData/<str:meter_id>', views.revertMeterEndData, name="revertMeterEndData"),
 	path('componentWiseAnalysis/<str:meter_id>', views.componentWiseAnalysis, name="componentWiseAnalysis"),
+
+	path('specialReports/<str:meter_id>', views.specialReports, name="specialReports"),
 
 	path('getNecessaryFiles', views.getNecessaryFiles, name ="getNecessaryFiles"),
 	path('downLoadNecessaryFile/<str:necessaryFileId_id>', views.downLoadNecessaryFile, name ="downLoadNecessaryFile"),

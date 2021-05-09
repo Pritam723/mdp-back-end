@@ -43,7 +43,7 @@ def fetchData(meter_id,_end1,_end2,polarity) :
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -79,7 +79,7 @@ def fetchData(meter_id,_end1,_end2,polarity) :
     
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
     
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()

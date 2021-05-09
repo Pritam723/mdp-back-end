@@ -76,7 +76,7 @@ def createRealMeterMWH(path,_meterData) :
 
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -107,11 +107,13 @@ def createRealMeterMWH(path,_meterData) :
         else :
             return(meterDetails[0])
 
+
     # Reading Master Frequency Info
     masterFreqMeter = {"Loc_Id" : '' , "Meter_No" : '' , "ctr" : 0 , "ptr" : 0 }
-    masterFreqData = open(settings.MEDIA_ROOT+'/necessaryFiles/FRQMASTR.dat', "r")
+    masterFreqData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FRQMASTR.dat', "r")
     masterFreqDataList = masterFreqData.readlines()
     masterFreqData.close()
+
     for elem in masterFreqDataList :
         if(len(elem) > 1) :
             # print(elem.split())
@@ -126,8 +128,23 @@ def createRealMeterMWH(path,_meterData) :
                 
                 
     print(masterFreqMeter)
+    # Done Reading Master Frequency Info
 
-    # Reading validated,datefiltered data
+    # Reading Frequency Graph Info
+    meterNumbersFreqGraph = []
+    freqGraphData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FrequencyGraph.dat', "r")
+    freqGraphDataList = freqGraphData.readlines()
+    freqGraphData.close()
+    for elem in freqGraphDataList :
+        if(len(elem) > 1 and elem[0] != '#' and elem.strip() != 'LOC_ID') :
+            if(getMeterInfoById(elem.strip()) is not None) :
+                meterNumbersFreqGraph.append(getMeterInfoById(elem.strip())['Meter_No'])
+                
+    print("Printing frequency graph info...")           
+    print(meterNumbersFreqGraph)
+    # Done Frequency Graph Info
+
+    #Reading validated,datefiltered data
     data = pd.read_csv(meterFileMainFolder+'/Validated File/ValidatedFile.npc', header = None)
     dfSeries = pd.DataFrame(data)
     df = dfSeries[0]
@@ -217,15 +234,26 @@ def createRealMeterMWH(path,_meterData) :
             # mwhFile.to_csv(relativeFilePathCopy + headerDate + "/" + meterName +'.MWH', header=False, index=None)
             mwhFile.to_csv(relativeFilePath + headerDate + "/" + meterName +'.MWH', header=False, index=None)
             
-            if meterName == masterFreqMeter['Meter_No'] :
-                masterFreq = pd.Series([],dtype=object)
-                masterFreq = masterFreq.append(pd.Series(''.join('Master Frequency Data for the date: ' + headerDate)), ignore_index=True)
+            if( (meterName == masterFreqMeter['Meter_No']) or (meterName in meterNumbersFreqGraph) ) :
 
-                masterFreq = masterFreq.append(pd.Series(' '.join(frequencyData)), ignore_index=True)
-                # masterFreq.to_csv(relativeFilePathCopy + headerDate + '/masterFrequency.MFD', header=False, index=None)
-                masterFreq.to_csv(relativeFilePath + headerDate + '/masterFrequency.MFD', header=False, index=None)
+                if(meterName == masterFreqMeter['Meter_No']) :
+                    masterFreq = pd.Series([],dtype=object)
+                    masterFreq = masterFreq.append(pd.Series(''.join('Master Frequency Data for the date: ' + headerDate)), ignore_index=True)
 
-                print("Meter name : " + meterName + ". Freq : " + str(frequencyData))
+                    masterFreq = masterFreq.append(pd.Series(' '.join(frequencyData)), ignore_index=True)
+                    # masterFreq.to_csv(relativeFilePathCopy + headerDate + '/masterFrequency.MFD', header=False, index=None)
+                    masterFreq.to_csv(relativeFilePath + headerDate + '/masterFrequency.MFD', header=False, index=None)
+
+                    print("Meter name : " + meterName + ". Freq : " + str(frequencyData))
+                else :
+                    freqData = pd.Series([],dtype=object)
+                    freqData = freqData.append(pd.Series(''.join(meterName +' Frequency Data for the date: ' + headerDate)), ignore_index=True)
+
+                    freqData = freqData.append(pd.Series(' '.join(frequencyData)), ignore_index=True)
+                    # freqData.to_csv(relativeFilePathCopy + headerDate + '/masterFrequency.MFD', header=False, index=None)
+                    freqData.to_csv(relativeFilePath + headerDate + '/' + meterName + '.FD', header=False, index=None)
+
+                    print("Meter name : " + meterName + ". Freq : " + str(frequencyData))
             
             print("Changing meter header")
         print("----------------------Changing Week header------" + str(weekListIndex) + "-----------------------------")

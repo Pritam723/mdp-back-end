@@ -72,6 +72,15 @@ def spaceAdjustmentFictMeter(_df) :
         i+=1
     return _df
 
+def scalarToSeries(floatValue,customHeader = ["No header"]) : # Replace header with desired value.
+    scalarDf = pd.Series([],dtype=object)
+    scalarDf = scalarDf.append(pd.Series(''.join(customHeader)), ignore_index=True)
+    for timeStamp in range(24) :
+        rowPart = [str((timeStamp)*100).zfill(4)] + [f'{(float(x)) :.6f}' for x in [str(floatValue)]*4]
+        scalarDf = scalarDf.append(pd.Series(' '.join((rowPart))), ignore_index=True)
+        scalarDf = scalarDf.reset_index(drop=True)
+    return scalarDf
+
 
 def dirJsonFictMeterMWH(nPath,_meterData,fictMwhDict):
     d = {'name': os.path.basename(nPath)}
@@ -118,7 +127,7 @@ def createFictMeterMWH(path,_meterData) :
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'/necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -154,7 +163,7 @@ def createFictMeterMWH(path,_meterData) :
     
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
     
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -197,7 +206,7 @@ def createFictMeterMWH(path,_meterData) :
     # fictMeterDict['(BM-99)'] gives      -(BI-09)*0.97899. trim spaces later. \n trimmed
 
 
-    fctCFG = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.CFG', "r")
+    fctCFG = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.CFG', "r")
     fList = fctCFG.readlines()
     # print(len(fList[len(fList)-2]))
     # print((fList[len(fList)-2])[:3])
@@ -355,7 +364,7 @@ def createFictMeterMWH(path,_meterData) :
         # stack to store operators.
         ops = []
         i = 0
-        
+
         while i < len(tokens):
             
             # Current token is a whitespace,
@@ -375,15 +384,24 @@ def createFictMeterMWH(path,_meterData) :
             # Current token is a meter ID, push 
             # it to stack for numbers.
             elif tokens[i].isalpha() :
-                val = tokens[i : i+5].replace("_","-")
-                if(os.path.exists(relativeReadPath + _mwhDate + "/" + searchMeterNumber(val) + '.MWH')) :
-                    data = pd.read_csv(relativeReadPath + _mwhDate + "/" + searchMeterNumber(val) + '.MWH', header = None)  # May give FileNotFoundError
+                val = tokens[i : i+5].replace("_","-") 
+
+                if(getMeterInfoById(val) is not None) :  # That is the meter is real meter
+                    if(os.path.exists(relativeReadPath + _mwhDate + "/" + searchMeterNumber(val) + '.MWH')) :
+                        data = pd.read_csv(relativeReadPath + _mwhDate + "/" + searchMeterNumber(val) + '.MWH', header = None)
+                        dfSeries = pd.DataFrame(data)
+                        df = dfSeries[0]
+                        values.append(df)  
+                    else :
+                        print("i work here for " + val)
+                        print(values)
+                        values.append(float(0))   # That is, in case of non-existance of real meter we will use 0 during calculation.
                 else :
-                    data = pd.read_csv(relativeFilePath + _mwhDate + "/" + searchMeterNumber(val) + '.MWH', header = None)
-                # print(data)
-                dfSeries = pd.DataFrame(data)
-                df = dfSeries[0]
-                values.append(df)
+                    data = pd.read_csv(relativeFilePath + _mwhDate + "/" + searchMeterNumber(val) + '.MWH', header = None) # May give FileNotFoundError
+                    # print(data)
+                    dfSeries = pd.DataFrame(data)
+                    df = dfSeries[0]
+                    values.append(df)
                 
                 i+=4              
                 
@@ -468,7 +486,7 @@ def createFictMeterMWH(path,_meterData) :
     # For Loc_Id to MeterName conversion & opposite, we will use fictMeterInfo & realMeterInfo
     # undefinedFictMetConf : Will have those fictmeter IDs which has no equation defined in CFG file i.e. no entry in fictMeterDict.
 
-    fctData = open(settings.MEDIA_ROOT+'/necessaryFiles/FICTMTRS.dat', "r")
+    fctData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
     fctDataList = fctData.readlines()
     fctData.close()
     undefinedFictMetConf = []
@@ -498,6 +516,11 @@ def createFictMeterMWH(path,_meterData) :
 
                     for mwhDate in mwhDates :
                         df = evaluate(fictMeterId,mwhDate,myExp)
+                        print(df)
+                        print("before space adjustment")
+                        if(isinstance(df, float)) : 
+                            df = scalarToSeries(float(df),[fictMeterId + " " + getFictMeterInfoById(fictMeterId)['Fict_Meter_No'] + " " + mwhDate + " " + "0.0000 0.0 0.0"])
+
                         df = spaceAdjustmentFictMeter(df)
                         # print(df)
                         # Check if df is a series or float now. Act accordingly. 
@@ -552,6 +575,12 @@ def createFictMeterMWH(path,_meterData) :
 
                     for mwhDate in mwhDates :
                         df = evaluate(fictMeterId,mwhDate,myExp)
+                        print(df)
+                        print("before space adjustment")
+
+                        if(isinstance(df, float)) :
+                            df = scalarToSeries(float(df),[fictMeterId + " " + getFictMeterInfoById(fictMeterId)['Fict_Meter_No'] + " " + mwhDate + " " + "0.0000 0.0 0.0"])
+
                         df = spaceAdjustmentFictMeter(df)
                         # Check if df is a series or float now. Act accordingly.
                         # If df is float, it implies that fictMeterId,mwhDate etc info never used. Only ffOperation() is called.

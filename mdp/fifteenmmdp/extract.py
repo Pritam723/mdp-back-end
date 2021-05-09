@@ -11,7 +11,7 @@ def dirJsonNPC(nPath,_meterData,npcDict):
         d['path'] = os.path.relpath(nPath, 'fifteenmmdp/media')
         d['files'] = [dirJsonNPC(os.path.join(nPath, x),_meterData,npcDict) for x in os.listdir(nPath)]
     else:
-        if(os.path.splitext(nPath)[1].lower() == '.npc') :
+        if(os.path.splitext(nPath)[1].lower() == '.npc' or os.path.splitext(nPath)[1].lower() == '.dat' or os.path.splitext(nPath)[1].lower() == '.cfg' or os.path.splitext(nPath)[1].lower() == '.xlsx') :
             print(os.path.basename(nPath))
 
             d['id'] = npcDict['lastIndex']

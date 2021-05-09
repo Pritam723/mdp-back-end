@@ -138,7 +138,7 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -174,7 +174,7 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
 
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
 
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -676,7 +676,7 @@ def revertMeterEndChanges(path,meterEndToReplace) :
     ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -712,7 +712,7 @@ def revertMeterEndChanges(path,meterEndToReplace) :
 
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
 
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
@@ -778,7 +778,7 @@ def zeroFillMeter(path,_meterData,meterEndToZeroFill) :
         ################################################### All RealMeters here. List of fict meters : #############################################
 
     realMeterInfo = []
-    masterData = open(settings.MEDIA_ROOT+'necessaryFiles/master.dat', "r")
+    masterData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/master.dat', "r")
     masterDataList = masterData.readlines()
     masterData.close()
     for elem in masterDataList :
@@ -814,7 +814,7 @@ def zeroFillMeter(path,_meterData,meterEndToZeroFill) :
 
     # [{'Loc_Id': 'FK-91', 'Fict_Meter_No': 'FKK-TOT-LN'} ,{'Loc_Id': 'FK-93', 'Fict_Meter_No': 'FKK-TOT-CL'}]
     fictMeterInfo = []
-    fictInfoData = open(settings.MEDIA_ROOT+'necessaryFiles/FICTMTRS.dat', "r")
+    fictInfoData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/FICTMTRS.dat', "r")
 
     fictInfoDataList = fictInfoData.readlines()
     fictInfoData.close()
