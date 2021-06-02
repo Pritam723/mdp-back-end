@@ -78,9 +78,9 @@ def preValidate(df) :
             meterNames = [df[x].split()[0] for x in informationDict[weekListIndex][:-1]]  # Must be unique
             meterDates = [datetime.strptime(df[x].split()[4], "%d-%m-%y") for x in informationDict[weekListIndex][:-1]] # Must be consequtive in the range of weekStartDate_object to weekEndDate_object
             
-            if(not (isMeterNameUnique(meterNames) and isMeterDateConsecutive(meterDates,weekStartDate_object,weekEndDate_object))) :
+            # if(not (isMeterNameUnique(meterNames) and isMeterDateConsecutive(meterDates,weekStartDate_object,weekEndDate_object))) :
 
-            # if(not (isMeterNameUnique(meterNames))) :
+            if(not (isMeterNameUnique(meterNames))) :
                 print("I am error at "+ str(weekListIndex))
                 errorList.append("Different meter names/non-consecutive dates inside same WEEK Header :{{ " + str(df[weekListIndex]) + " }}. Line number : " + str(errorLine+1))
                 continue

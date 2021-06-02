@@ -156,8 +156,8 @@ def extract(request,meter_id):
 
 
         if(not (meterData.status is None) and (statusCodes.index(meterData.status) == 0)) :
-
             shutil.copytree('fifteenmmdp/media/necessaryFiles', "fifteenmmdp/media/meterFile/meterFile"+ meter_id +"/NPC Files/Necessary Files Local Copy")
+
 
             print("Extract executed")
 
