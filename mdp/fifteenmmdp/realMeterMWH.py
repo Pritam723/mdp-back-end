@@ -59,7 +59,7 @@ def dirJsonRealMeterMWH(nPath,_meterData,mwhDict):
 
     return d
 
-def createRealMeterMWH(path,_meterData) :
+def createRealMeterMWH(path,_meterData,overWrite) :
     print("i am in createRealMeterMWH " + path)
 
     meterFileMainFolder = os.path.join("fifteenmmdp/media/meterFile",path)
@@ -84,7 +84,17 @@ def createRealMeterMWH(path,_meterData) :
             # print(elem.split())
             realMeterInfo.append({"Loc_Id" : elem.split()[0] , "Meter_No" : elem.split()[1] , "ctr" : elem.split()[2] , "ptr" : elem.split()[3] })
 
+    bTypeMeterInfo = []
+    bTypeData = open(meterFileMainFolder+'/NPC Files/Necessary Files Local Copy/B-TypeMeter.dat', "r")
+    bTypeDataList = bTypeData.readlines()
+    bTypeData.close()
+    for elem in bTypeDataList :
+        if(len(elem) > 1 and isMeterIdPattern(elem.split()[0])) :
+            bTypeMeterInfo.append(elem.split()[0])
+
+
     # print(realMeterInfo)
+    # print(bTypeMeterInfo)
 
     def getMeterInfoById(Loc_Id) :
         
@@ -190,8 +200,16 @@ def createRealMeterMWH(path,_meterData) :
                 realMeterNotInDB.append("Meter Entry not in Database : " + meterName)
                 continue
             meterId = meterDetail['Loc_Id']
-            ctr = float(meterDetail['ctr'])
+
+            if(meterId in bTypeMeterInfo) :
+                ctr = float(meterDetail['ctr']) * 5
+            else :
+                ctr = float(meterDetail['ctr'])
+
             ptr = float(meterDetail['ptr'])
+            print(meterName + " ctr is " + str(ctr))
+            print(meterName + " ptr is " + str(ptr))
+
             #######################################################################################
             
             headerDate = meterHeaderData[4] # Foldername
@@ -232,7 +250,13 @@ def createRealMeterMWH(path,_meterData) :
                 os.makedirs(relativeFilePath+headerDate+"/")
 
             # mwhFile.to_csv(relativeFilePathCopy + headerDate + "/" + meterName +'.MWH', header=False, index=None)
-            mwhFile.to_csv(relativeFilePath + headerDate + "/" + meterName +'.MWH', header=False, index=None)
+            if(overWrite == "false") :
+                if os.path.exists(relativeFilePath + headerDate + "/" + meterName +'.MWH') :
+                    print("Keep files as it is")
+                else :
+                    mwhFile.to_csv(relativeFilePath + headerDate + "/" + meterName +'.MWH', header=False, index=None)
+            else :
+                mwhFile.to_csv(relativeFilePath + headerDate + "/" + meterName +'.MWH', header=False, index=None)
             
             if( (meterName == masterFreqMeter['Meter_No']) or (meterName in meterNumbersFreqGraph) ) :
 
@@ -255,9 +279,9 @@ def createRealMeterMWH(path,_meterData) :
 
                     print("Meter name : " + meterName + ". Freq : " + str(frequencyData))
             
-            print("Changing meter header")
-        print("----------------------Changing Week header------" + str(weekListIndex) + "-----------------------------")
-    print("-------------------------Done-------------------------")
+            # print("Changing meter header")
+        # print("----------------------Changing Week header------" + str(weekListIndex) + "-----------------------------")
+    # print("-------------------------Done-------------------------")
 
     # print(realMeterNotInDB)
 
@@ -296,8 +320,8 @@ def createRealMeterMWH(path,_meterData) :
         mwhDict = {'lastIndex' : 1}
 
         jsonOutput = dirJsonRealMeterMWH(os.path.splitext(relativeFilePath)[0],_meterData,mwhDict)
-        print(json.dumps(jsonOutput))
-        print(mwhDict)
+        # print(json.dumps(jsonOutput))
+        # print(mwhDict)
         
         realMeterMWHFileObject = RealMeterMWHFile.objects.create(mwhDictionary = json.dumps(mwhDict),dirStructureRealMWH=json.dumps(jsonOutput), meterFile = _meterData)
         realMeterMWHFileObject.save()

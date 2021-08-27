@@ -17,6 +17,17 @@ def endDifference(_end2,_end1) :
             diffList.append(_end2[i] - _end1[i])
     return diffList
 
+def endDifferencePercentage(_end2,_end1) :
+    percentList = []
+    for i in range(len(_end2)):
+        if(_end2[i] is None or _end1[i] is None) :
+            percentList.append(None)
+        elif(float(_end1[i]) == 0.0) :
+            percentList.append(0)
+        else :
+            percentList.append((_end2[i] - _end1[i])*100/_end1[i])
+    return percentList
+
 def timeSeries() :
     _timeSeries = []
     ts = datetime.strptime('00:00', '%H:%M')
@@ -178,5 +189,7 @@ def fetchData(meter_id,_end1,_end2,polarity) :
     print(len(end2Data))
     # print(xAxisData)
 
-    graphData = {'end1Data' : end1Data ,'end2Data' : end2Data , 'xAxisData' : xAxisData , 'diff' : endDifference(end2Data,end1Data)}
+    graphData = {'end1Data' : end1Data ,'end2Data' : end2Data , 'xAxisData' : xAxisData , 'diff' : endDifference(end2Data,end1Data), 'diffPercentage' : endDifferencePercentage(end2Data,end1Data)}
+
+    
     return graphData

@@ -478,12 +478,18 @@ def getRealMeterMWHData(request, meter_id):   # Data of single meter
 
 
 @csrf_exempt
-def realMeterMWH(request,meter_id):
+def realMeterMWH(request,meter_id,overWrite):
     # try :
     print(meter_id)
+    if(overWrite == "false") :
+        print("Keep file as it is")
+    else :
+        shutil.rmtree(os.path.join("fifteenmmdp/media/meterFile","meterFile"+meter_id,"Real Meter MWH Files(Copy)"))
+        print("overwrite the files")
+    print(type(overWrite))
     meterFile = AllMeterFiles.objects.get(id=int(meter_id))
     print(meterFile.status)
-    createRealMeterMWH(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
+    createRealMeterMWH(path = "meterFile"+meter_id, _meterData = meterFile, overWrite = overWrite)  #Path given
     return HttpResponse({'message': 'Real Meter MWH Created'}, status=200)
     # except Exception as e :
     #     return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
@@ -658,101 +664,6 @@ def downLoadFullFictMeterMWHFiles(request,meter_id):
 ############################## Create Final Output Files #################################################################
 
 
-
-@csrf_exempt
-def getRealMeterMWHData(request, meter_id):   # Data of single meter
-
-    print("inside getRealMeterMWHData")
-    print(meter_id)
-
-    realMeterMWHFiles = list(filter(lambda realMeterMWHFile: (realMeterMWHFile.realMeterMWHFileMeterId() == meter_id),RealMeterMWHFile.objects.all()))
-    # realMeterMWHFile = realMeterMWHFiles[0]
-    # mwhDict = json.loads(realMeterMWHFile.mwhDictionary)
-    # print(mwhDict["1"])
-    realMeterMWHFiles_json = serializers.serialize("json", realMeterMWHFiles , fields=('dirStructureRealMWH','meterFile'))
-    # data = {"data": AllMeterFiles_json}
-    # return JsonResponse(data)
-    return HttpResponse(realMeterMWHFiles_json, content_type="text/json-comment-filtered")
-
-
-@csrf_exempt
-def realMeterMWH(request,meter_id):
-    # try :
-    print(meter_id)
-    meterFile = AllMeterFiles.objects.get(id=int(meter_id))
-    print(meterFile.status)
-    createRealMeterMWH(path = "meterFile"+meter_id, _meterData = meterFile)  #Path given
-    return HttpResponse({'message': 'Real Meter MWH Created'}, status=200)
-    # except Exception as e :
-    #     return HttpResponse(json.dumps([str(e)]), content_type='application/json',status=500)
-
-@csrf_exempt
-def downloadRealMeterMWHFile(request,meter_id,realMeterMWH_id):   # Single File only
-
-    print("inside downloadRealMeterMWHFile")
-    print(realMeterMWH_id)
-    # realMeterMWHFile = RealMeterMWHFile.objects.get(id=int(realMeterMWH_id))
-
-    realMeterMWHFiles = list(filter(lambda realMeterMWHFile: (realMeterMWHFile.realMeterMWHFileMeterId() == meter_id),RealMeterMWHFile.objects.all()))
-    realMeterMWHFile = realMeterMWHFiles[0]
-    mwhDict = json.loads(realMeterMWHFile.mwhDictionary)
-
-    outputFile_path = os.path.join(settings.MEDIA_ROOT,mwhDict[realMeterMWH_id])
-    print(outputFile_path)
-
-    if(os.path.exists(outputFile_path)) :
-        with open(outputFile_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="text/plain")
-            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(mwhDict[realMeterMWH_id])
-            return response
-
-    return HttpResponse("There is no Real Meter MWH File to download")
-
-
-@csrf_exempt
-def changeRealMeterMWHFile(request,meter_id,realMeterMWH_id):
-
-    print("inside changeRealMeterMWHFile")
-    print(realMeterMWH_id)
-
-    print(request.FILES['fileToUpload'])
-    myfile = request.FILES['fileToUpload']
-    # realMeterMWHFileToChange = RealMeterMWHFile.objects.get(id = realMeterMWH_id)
-    print(myfile)
-    print(myfile.name)
-    realMeterMWHFiles = list(filter(lambda realMeterMWHFile: (realMeterMWHFile.realMeterMWHFileMeterId() == meter_id),RealMeterMWHFile.objects.all()))
-    realMeterMWHFile = realMeterMWHFiles[0]
-    mwhDict = json.loads(realMeterMWHFile.mwhDictionary)
-    print(mwhDict[realMeterMWH_id])
-    # useThisLoc = 'fifteenmmdp/media'+mwhDict[realMeterMWH_id]
-    useThisLoc = mwhDict[realMeterMWH_id]
-
-    fs = OverwriteStorage()
-    fs.save(useThisLoc, myfile)
-    # realMeterMWHFileToChange.npcFile = request.FILES['fileToUpload']
-    # realMeterMWHFileToChange.save()
-    return HttpResponse({'message': 'RealMeterMWHFile Changed'}, status=200)
-
-
-def downLoadFullRealMeterMWHFiles(request,meter_id):
-    print("inside downLoadFullRealMeterMWHFiles")
-    print(meter_id)
-
-    path = os.path.join(settings.MEDIA_ROOT,'meterFile/meterFile'+meter_id)
-    inputFile_path = os.path.join(path,'Real Meter MWH Files')
-    outputFile_path = os.path.join(path,'Real_Meter_MWH.zip')
-
-    shutil.make_archive(os.path.splitext(outputFile_path)[0], 'zip', inputFile_path)
-
-    if(os.path.exists(outputFile_path)) :
-        with open(outputFile_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="application/force-download")
-            response['Content-Disposition'] = 'attachment; filename=' + 'Real_Meter_MWH.zip'
-            return response
-
-    return HttpResponse("There is no Real Meter MWH File to download")
-############################## Create Fictitious Meter MWH #################################################################
-
 @csrf_exempt
 def getFinalOutputData(request, meter_id):   # Data of single meter
 
@@ -895,7 +806,53 @@ def fetchGraphData(request,meter_id,end1,end2,polarity):
     print(end2)
     print(polarity)
     graphData = fetchData(meter_id,end1,end2,polarity)
-    return HttpResponse(json.dumps(graphData), content_type='application/json')
+    return HttpResponse(json.dumps(graphData), content_type='application/json') 
+
+@csrf_exempt
+def fetchGraphDataExcel(request,meter_id,end1,end2,polarity):
+    print(meter_id)
+    print(end1)
+    print(end2)
+    print(polarity)
+    graphData = fetchData(meter_id,end1,end2,polarity)
+    # return HttpResponse(json.dumps(graphData), content_type='application/json')
+    # graphData = {'end1Data' : end1Data ,'end2Data' : end2Data , 'xAxisData' : xAxisData , 'diff' : endDifference(end2Data,end1Data), 'diffPercentage' : endDifferencePercentage(end2Data,end1Data)}
+
+    
+    meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile","meterFile"+meter_id)
+
+    print("inside fetchGraphDataExcel")
+
+    graphDataExcel = {}
+
+    graphDataExcel['Date'] = [item.split()[0] for item in graphData['xAxisData']]
+    graphDataExcel['Timestamp'] = [item.split()[1] for item in graphData['xAxisData']]
+
+    graphDataExcel[end1] = graphData['end1Data']
+    graphDataExcel[end2] = graphData['end2Data']
+    graphDataExcel['Difference'] = graphData['diff']
+    graphDataExcel['Difference Percentage'] = graphData['diffPercentage']
+
+
+    dfExcel = pd.DataFrame.from_dict(graphDataExcel)
+
+    if(not os.path.exists(meterFileMainFolder + '/Pair Comparison')) :
+        os.mkdir(meterFileMainFolder + '/Pair Comparison')
+
+    outputFile_path = os.path.join(meterFileMainFolder,'Pair Comparison',end1 +" vs " + end2 +".xlsx")
+
+    dfExcel.to_excel(outputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + end1 + " vs " + end2 +".xlsx"
+            return response
+
+    return HttpResponse("There is no File to download")
+
+
+
 
 
 @csrf_exempt
@@ -955,6 +912,42 @@ def componentWiseAnalysis(request,meter_id):
     componentWiseGraphData = componentWiseMeterAnalysis("meterFile"+meter_id ,meterEndToAnalyse)
 
     return HttpResponse(json.dumps(componentWiseGraphData), content_type='application/json')
+
+@csrf_exempt
+def componentWiseExcelData(request,meter_id,meterEndToExcelData):
+    
+    meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile","meterFile"+meter_id)
+
+    # meterEndToExcelData = request.POST['meterEndToExcelData']
+    print(meterEndToExcelData)
+    print(meter_id)
+    print("inside componentWiseAnalysis")
+    componentWiseGraphData = componentWiseMeterAnalysis("meterFile"+meter_id ,meterEndToExcelData)
+
+    downloadExcelData = {}
+
+    downloadExcelData['Date'] = [item.split()[0] for item in componentWiseGraphData[0]['x']]
+    downloadExcelData['Timestamp'] = [item.split()[1] for item in componentWiseGraphData[0]['x']]
+
+    for componentData in componentWiseGraphData :
+        downloadExcelData[componentData['name']] = componentData['y']
+
+    dfExcel = pd.DataFrame.from_dict(downloadExcelData)
+
+    if(not os.path.exists(meterFileMainFolder + '/Component-Wise Excel Data')) :
+        os.mkdir(meterFileMainFolder + '/Component-Wise Excel Data')
+
+    outputFile_path = os.path.join(meterFileMainFolder,'Component-Wise Excel Data',meterEndToExcelData+".xlsx")
+
+    dfExcel.to_excel(outputFile_path)
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'attachment; filename=' + meterEndToExcelData+".xlsx"
+            return response
+
+    return HttpResponse("There is no File to download")
 
 ############################## Special Reports #################################################################
 

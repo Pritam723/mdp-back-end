@@ -51,7 +51,7 @@ urlpatterns = [
 	path('changeValidatedFile/<str:validatedFile_id>', views.changeValidatedFile, name ="changeValidatedFile"),
 
     path('getRealMeterMWHData/<str:meter_id>', views.getRealMeterMWHData, name ="getRealMeterMWHData"),
-	path('realMeterMWH/<str:meter_id>', views.realMeterMWH, name = "realMeterMWH"),
+	path('realMeterMWH/<str:meter_id>/<str:overWrite>', views.realMeterMWH, name = "realMeterMWH"),
 	path('changeRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.changeRealMeterMWHFile, name ="changeRealMeterMWHFile"),
 	path('downloadRealMeterMWHFile/<str:meter_id>/<str:realMeterMWH_id>', views.downloadRealMeterMWHFile, name ="downloadRealMeterMWHFile"),
 	path('downLoadFullRealMeterMWHFiles/<str:meter_id>', views.downLoadFullRealMeterMWHFiles, name ="downLoadFullRealMeterMWHFiles"),
@@ -75,11 +75,14 @@ urlpatterns = [
 
 	path('analyseData/<str:meter_id>', views.analyseData, name = "analyseData"),
 	path('fetchGraphData/<str:meter_id>/<str:end1>/<str:end2>/<str:polarity>',views.fetchGraphData,name="fetchGraphData"),
+	path('fetchGraphDataExcel/<str:meter_id>/<str:end1>/<str:end2>/<str:polarity>',views.fetchGraphDataExcel,name="fetchGraphDataExcel"),
 	path('fetchDateInfo/<str:meter_id>', views.fetchDateInfo, name="fetchDateInfo"),
 	path('zeroFillMeterEndData/<str:meter_id>', views.zeroFillMeterEndData, name="zeroFillMeterEndData"),
 	path('changeMeterEndData/<str:meter_id>', views.changeMeterEndData, name="changeMeterEndData"),
 	path('revertMeterEndData/<str:meter_id>', views.revertMeterEndData, name="revertMeterEndData"),
 	path('componentWiseAnalysis/<str:meter_id>', views.componentWiseAnalysis, name="componentWiseAnalysis"),
+	path('componentWiseExcelData/<str:meter_id>/<str:meterEndToExcelData>', views.componentWiseExcelData, name="componentWiseExcelData"),
+
 
 	path('specialReports/<str:meter_id>', views.specialReports, name="specialReports"),
 

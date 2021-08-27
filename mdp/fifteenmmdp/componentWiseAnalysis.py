@@ -207,5 +207,7 @@ def componentWiseMeterAnalysis(path ,meterEndToAnalyse):
         componentData['y'] = endData
 
         dynamicGraphData.append(componentData)
-
+    # #####################################################################################
+ 
+################################################################################################
     return dynamicGraphData

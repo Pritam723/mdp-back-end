@@ -221,7 +221,7 @@ def dateFilterMergedFile(path,_meterData) :
                     day = userStartDate_object + timedelta(days=i)
                     nonAvailableForDates.append(datetime.strftime(day, "%d-%m-%y"))  
                 
-                nonAvailabilityInDateRange.append("Meter number : "+meterNames[0]+ ". For dates :: "+ (",".join(nonAvailableForDates)))
+                nonAvailabilityInDateRange.append("Meter number : "+meterNames[0]+ " : "+ (",".join(nonAvailableForDates)))
                 continue
 
             else :
@@ -255,7 +255,7 @@ def dateFilterMergedFile(path,_meterData) :
             dateFixedDf = dateFixedDf.append(pd.Series(" ".join(weekHeaderData)), ignore_index=True)
             
             if(len(nonAvailableForDates) != 0) :
-                nonAvailabilityInDateRange.append("Meter number : "+meterNames[0]+ ". For dates :: "+ (",".join(nonAvailableForDates)))
+                nonAvailabilityInDateRange.append("Meter number : "+meterNames[0]+ " : "+ (",".join(nonAvailableForDates)))
             print("For weekheader"+str(weekListIndex)+" : "+str(informationDict[weekListIndex]))
             
             for k in range(len(informationDict[weekListIndex])-1):
@@ -313,7 +313,7 @@ def dateFilterMergedFile(path,_meterData) :
                 day = userStartDate_object + timedelta(days=i)
                 nonAvailableForDates.append(datetime.strftime(day, "%d-%m-%y"))  
                 
-            nonAvailabilityInDateRange.append("Meter number : "+ meterWithNoData + ". For dates :: "+ (",".join(nonAvailableForDates)))
+            nonAvailabilityInDateRange.append("Meter number : "+ meterWithNoData + " : "+ (",".join(nonAvailableForDates)))
                 
                 
         print("-----------------------------------------------------------------")
@@ -323,7 +323,7 @@ def dateFilterMergedFile(path,_meterData) :
 
         nrxFiledDf = pd.Series([],dtype=object)
         if(len(nonAvailabilityInDateRange)) :
-            nrxFiledDf = nrxFiledDf.append(pd.Series(["Data not available for the following Meters : "]), ignore_index=True)
+            nrxFiledDf = nrxFiledDf.append(pd.Series(["Data not available for the following " + str(len(nonAvailabilityInDateRange)) + " Meter(s) : "]), ignore_index=True)
             nrxFiledDf = nrxFiledDf.append(pd.Series([" "]), ignore_index=True)
 
             for item in nonAvailabilityInDateRange :
@@ -334,7 +334,7 @@ def dateFilterMergedFile(path,_meterData) :
 
         if(len(notDefinedMeters)) :
 
-            nrxFiledDf = nrxFiledDf.append(pd.Series(["Following Meters are not defined in master.dat file : "]), ignore_index=True)
+            nrxFiledDf = nrxFiledDf.append(pd.Series(["Following " + str(len(notDefinedMeters)) + " Meter(s) are not defined in master.dat file : "]), ignore_index=True)
             nrxFiledDf = nrxFiledDf.append(pd.Series([" "]), ignore_index=True)
 
             for item in notDefinedMeters :
