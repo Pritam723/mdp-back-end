@@ -569,39 +569,55 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
         fromTimeHr , fromTimeMinute = [int(x) for x in fromTime.split(":")]
         toTimeHr , toTimeMinute = [int(x) for x in toTime.split(":")]
 
-        for hr in range(fromTimeHr , toTimeHr+1):
 
-            if(hr == fromTimeHr) :
-                print(df1[hr+1].split())
-                oldRow = df1[hr+1].split()
-                newRow = df2[hr+1].split()
+        if(fromTimeHr == toTimeHr) :
+            hr = fromTimeHr
+            print("Same Start End Hour")
+            print(df1[hr+1].split())
+            oldRow = df1[hr+1].split()
+            newRow = df2[hr+1].split()
+            for minute in range(fromTimeMinute//15 + 1, toTimeMinute//15 + 2) :
+                oldRow[minute] = newRow[minute]
+                
+            oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
 
-                for minute in range(fromTimeMinute//15 + 1,5) :
-                    oldRow[minute] = newRow[minute]
+            df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow))
+        else: 
+            for hr in range(fromTimeHr , toTimeHr+1):
+
+                if(hr == fromTimeHr) :
+                    print("Start Hour")
+                    print(df1[hr+1].split())
+                    oldRow = df1[hr+1].split()
+                    newRow = df2[hr+1].split()
+
+                    for minute in range(fromTimeMinute//15 + 1,5) :
+                        oldRow[minute] = newRow[minute]
+                        
+                    oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
                     
-                oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
-                
-                df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow)) 
+                    df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow)) 
 
-            elif(hr == toTimeHr) :
-                print(df1[hr+1].split())
-                oldRow = df1[hr+1].split()
-                newRow = df2[hr+1].split()
+                elif(hr == toTimeHr) :
+                    print("End Hour")
+                    print(df1[hr+1].split())
+                    oldRow = df1[hr+1].split()
+                    newRow = df2[hr+1].split()
 
-                for minute in range(1,toTimeMinute//15 + 2) :
-                    oldRow[minute] = newRow[minute]
-                
-                oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
+                    for minute in range(1,toTimeMinute//15 + 2) :
+                        oldRow[minute] = newRow[minute]
+                    
+                    oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
 
-                df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow)) 
+                    df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow)) 
 
-            else :
-                print("In between time")
-                oldRow = df1[hr+1].split()
-                newRow = df2[hr+1].split()
-                oldRow = newRow
-                oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
-                df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow)) 
+                else :
+                    print("In between time")
+                    oldRow = df1[hr+1].split()
+                    newRow = df2[hr+1].split()
+                    oldRow = newRow
+                    oldRow = [oldRow[0]] + [f'{(float(x)) :.6f}' for x in oldRow[1:]]
+                    df1[hr+1] = ''.join(spaceAdjustmentRealMeterRow(oldRow)) 
 
 
         print(df1)
@@ -647,7 +663,7 @@ def changeMeterEndDataWithEquation(path,startDate,endDate,meterEndToReplace,equa
         singleDayReplacement(startDateObject.date(),meterEndToReplace,equationToReplaceWith,fromTime,toTime)
 
     else :
-        for day in range((endDateObject-startDateObject).days+1) :
+        for day in range((endDateObject.day - startDateObject.day)+1) :
             dateObj = startDateObject+timedelta(days=day)
             print(dateObj)
             

@@ -47,6 +47,18 @@ class OverwriteStorage(FileSystemStorage):
             os.remove(os.path.join(settings.MEDIA_ROOT, name))
         return name
 
+def meterChangeLog(file_name, text_to_append):
+    """Append given text as a new line at the end of file"""
+    # Open the file in append & read mode ('a+')
+    with open(file_name, "a+") as file_object:
+        # Move read cursor to the start of file.
+        file_object.seek(0)
+        # If file is not empty then append '\n'
+        data = file_object.read(100)
+        if len(data) > 0:
+            file_object.write("\n")
+        # Append text at the end of file
+        file_object.write(text_to_append)
 
 ######################### Testing ##########################################################################
 def index(request):
@@ -851,7 +863,23 @@ def fetchGraphDataExcel(request,meter_id,end1,end2,polarity):
 
     return HttpResponse("There is no File to download")
 
+@csrf_exempt
+def fetchMeterChangeLog(request,meter_id):
+    print(meter_id)
+  
+    meterFileMainFolder = os.path.join(settings.MEDIA_ROOT,"meterFile","meterFile"+meter_id)
 
+    print("inside fetchMeterChangeLog")
+    
+    outputFile_path = os.path.join(meterFileMainFolder,'ChangeLog.txt')
+
+    if(os.path.exists(outputFile_path)) :
+        with open(outputFile_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type='application/text charset=utf-8')
+            response['Content-Disposition'] = 'attachment; filename= "ChangeLog.txt"'
+            return response
+
+    return HttpResponse("No change has been done yet.")
 
 
 
@@ -878,6 +906,10 @@ def zeroFillMeterEndData(request,meter_id):
     meterFile = AllMeterFiles.objects.get(id=int(meter_id))
 
     zeroFillMeterError = zeroFillMeter("meterFile"+meter_id ,meterFile ,meterEndToZeroFill)
+    changeLog =  "Unavailable data for " + meterEndToZeroFill + " is filled with Zero"
+
+    meterChangeLog('fifteenmmdp\media\meterFile\meterFile129\ChangeLog.txt', changeLog)
+
     return HttpResponse("Success")
 
 
@@ -889,7 +921,10 @@ def changeMeterEndData(request,meter_id):
     meterEndToReplace = request.POST['meterEndToReplace']
     equationToReplaceWith = request.POST['equationToReplaceWith']
     changeMeterError = changeMeterEndDataWithEquation("meterFile"+meter_id ,startDate,endDate,meterEndToReplace,equationToReplaceWith)
+    print(startDate)
+    changeLog =  meterEndToReplace + " is replaced with " + equationToReplaceWith + " from timestamp "  + startDate + " to timestamp " + endDate
 
+    meterChangeLog('fifteenmmdp\media\meterFile\meterFile129\ChangeLog.txt', changeLog)
     return HttpResponse("Success")
 
 
@@ -900,7 +935,9 @@ def revertMeterEndData(request,meter_id):
     print(meter_id)
     print("inside revertMeterEndData")
     revertMeterEndChangesError = revertMeterEndChanges("meterFile"+meter_id ,meterEndToReplace)
+    changeLog =  "All the changes done on " + meterEndToReplace + " has been Reverted Back."
 
+    meterChangeLog('fifteenmmdp\media\meterFile\meterFile129\ChangeLog.txt', changeLog)
     return HttpResponse("Success")
 
 @csrf_exempt

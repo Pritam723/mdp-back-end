@@ -76,6 +76,7 @@ urlpatterns = [
 	path('analyseData/<str:meter_id>', views.analyseData, name = "analyseData"),
 	path('fetchGraphData/<str:meter_id>/<str:end1>/<str:end2>/<str:polarity>',views.fetchGraphData,name="fetchGraphData"),
 	path('fetchGraphDataExcel/<str:meter_id>/<str:end1>/<str:end2>/<str:polarity>',views.fetchGraphDataExcel,name="fetchGraphDataExcel"),
+	path('fetchMeterChangeLog/<str:meter_id>',views.fetchMeterChangeLog,name="fetchMeterChangeLog"),
 	path('fetchDateInfo/<str:meter_id>', views.fetchDateInfo, name="fetchDateInfo"),
 	path('zeroFillMeterEndData/<str:meter_id>', views.zeroFillMeterEndData, name="zeroFillMeterEndData"),
 	path('changeMeterEndData/<str:meter_id>', views.changeMeterEndData, name="changeMeterEndData"),
