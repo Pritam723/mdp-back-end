@@ -908,7 +908,7 @@ def zeroFillMeterEndData(request,meter_id):
     zeroFillMeterError = zeroFillMeter("meterFile"+meter_id ,meterFile ,meterEndToZeroFill)
     changeLog =  "Unavailable data for " + meterEndToZeroFill + " is filled with Zero"
 
-    meterChangeLog('fifteenmmdp\media\meterFile\meterFile129\ChangeLog.txt', changeLog)
+    meterChangeLog('fifteenmmdp\media\meterFile\meterFile' + str(meter_id) + '\ChangeLog.txt', changeLog)
 
     return HttpResponse("Success")
 
@@ -924,7 +924,7 @@ def changeMeterEndData(request,meter_id):
     print(startDate)
     changeLog =  meterEndToReplace + " is replaced with " + equationToReplaceWith + " from timestamp "  + startDate + " to timestamp " + endDate
 
-    meterChangeLog('fifteenmmdp\media\meterFile\meterFile129\ChangeLog.txt', changeLog)
+    meterChangeLog('fifteenmmdp\media\meterFile\meterFile' + str(meter_id) + '\ChangeLog.txt', changeLog)
     return HttpResponse("Success")
 
 
@@ -937,7 +937,7 @@ def revertMeterEndData(request,meter_id):
     revertMeterEndChangesError = revertMeterEndChanges("meterFile"+meter_id ,meterEndToReplace)
     changeLog =  "All the changes done on " + meterEndToReplace + " has been Reverted Back."
 
-    meterChangeLog('fifteenmmdp\media\meterFile\meterFile129\ChangeLog.txt', changeLog)
+    meterChangeLog('fifteenmmdp\media\meterFile\meterFile' + str(meter_id) +'\ChangeLog.txt', changeLog)
     return HttpResponse("Success")
 
 @csrf_exempt
