@@ -2,6 +2,8 @@
 mdp/fifteenmmdp/templates/
 mdp/fifteenmmdp/static/
 mdp\fifteenmmdp\media\meterFile
+mdp/db.sqlite3
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
